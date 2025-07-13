@@ -2,7 +2,7 @@
 
 class Database {
     private $host = "localhost";
-    private $db_name = "my_store";
+    private $db_name = "libsmart_db"; // Đổi tên database ở đây
     private $username = "root";
     private $password = "";
     public $conn;
@@ -16,7 +16,6 @@ class Database {
                 $this->username,
                 $this->password
             );
-            // Thiết lập chế độ lỗi của PDO
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->exec("set names utf8");
         } catch (PDOException $exception) {

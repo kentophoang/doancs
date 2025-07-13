@@ -1,24 +1,22 @@
-<!-- app/views/category/view.php -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thông tin danh mục</title>
+    <title>Thông tin chủ đề / ngành nghề</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #d3fcf7; /* Phông nền xanh nhạt */
+            background-color: #d3fcf7;
         }
         .container {
-            background-color: #ffffff; /* Màu nền của form */
+            background-color: #ffffff;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
         }
         h2 {
-            color: #00796b; /* Màu chữ tiêu đề */
+            color: #00796b;
         }
         .card {
             border-radius: 10px;
@@ -52,21 +50,20 @@
 <body>
 
 <div class="container mt-4">
-    <h2 class="text-center">Thông tin danh mục</h2>
+    <h2 class="text-center">Thông tin chủ đề / ngành nghề</h2>
 
-    <!-- Card hiển thị thông tin danh mục -->
     <div class="card">
         <div class="card-header">
-            <h4 class="card-title"><?= htmlspecialchars($category->name) ?></h4>
+            <h4 class="card-title"><?= htmlspecialchars($subject->name) ?></h4>
         </div>
         <div class="card-body">
             <p><strong>Mô tả:</strong></p>
-            <p><?= htmlspecialchars($category->description) ?></p>
+            <p><?= htmlspecialchars($subject->description) ?></p>
         </div>
         <div class="card-footer text-center">
-            <a href="/Category/edit/<?= $category->id ?>" class="btn btn-warning">Sửa danh mục</a>
-            <a href="/Category/delete/<?= $category->id ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">Xóa danh mục</a>
-            <a href="/Category/index" class="btn btn-secondary">Quay lại danh sách</a>
+            <a href="/Subject/edit/<?= $subject->id ?>" class="btn btn-warning">Sửa chủ đề</a>
+            <a href="/Subject/delete/<?= $subject->id ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa chủ đề này?');">Xóa chủ đề</a>
+            <a href="/Subject/index" class="btn btn-secondary">Quay lại danh sách</a>
         
         </div>
     </div>

@@ -2,7 +2,7 @@
 
 class AppDatabase {  // Đổi tên lớp để tránh xung đột
     private $host = "localhost";
-    private $db_name = "my_store";
+    private $db_name = "libsmart_db"; // Đổi tên database ở đây
     private $username = "root";
     private $password = "";
     public $conn;

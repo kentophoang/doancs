@@ -1,31 +1,29 @@
-<!-- app/views/category/create.php -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thêm danh mục mới</title>
+    <title>Thêm chủ đề / ngành nghề mới</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #d3fcf7; /* Màu nền xanh nhạt */
+            background-color: #d3fcf7;
         }
         .container {
-            background-color: #ffffff; /* Màu nền của form */
+            background-color: #ffffff;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
         }
         h2 {
-            color: #00796b; /* Màu chữ tiêu đề */
+            color: #00796b;
         }
         .btn-primary {
-            background-color: #00796b; /* Nút với màu xanh */
+            background-color: #00796b;
             border-color: #00796b;
         }
         .btn-secondary {
-            background-color: #0288d1; /* Nút quay lại màu xanh dương */
+            background-color: #0288d1;
             border-color: #0288d1;
         }
         .btn-primary:hover, .btn-secondary:hover {
@@ -36,23 +34,22 @@
 <body>
 
 <div class="container mt-4">
-    <h2 class="text-center">Thêm danh mục mới</h2>
+    <h2 class="text-center">Thêm chủ đề / ngành nghề mới</h2>
 
-    <!-- Form thêm danh mục mới -->
-    <form action="/Category/store" method="POST">
+    <form action="/Subject/store" method="POST">
         <div class="form-group">
-            <label for="name">Tên danh mục</label>
+            <label for="name">Tên chủ đề / ngành nghề</label>
             <input type="text" class="form-control" id="name" name="name" required>
         </div>
         <div class="form-group">
             <label for="description">Mô tả</label>
             <textarea class="form-control" id="description" name="description" required></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Thêm danh mục</button>
+        <button type="submit" class="btn btn-primary">Thêm chủ đề</button>
     </form>
 
-    <a href="/Category/index" class="btn btn-secondary mt-3">Quay lại danh sách</a>
-    <a href="/Product/index" class="btn btn-primary mt-3">Quay lại danh sách sản phẩm</a>       
+    <a href="/Subject/index" class="btn btn-secondary mt-3">Quay lại danh sách</a>
+    <a href="/Book/index" class="btn btn-primary mt-3">Quay lại danh sách sách</a>       
 
 </div>
 

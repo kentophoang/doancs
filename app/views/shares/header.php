@@ -1,10 +1,10 @@
 <?php
-require_once('app/models/CategoryModel.php');
+require_once('app/models/SubjectModel.php');
 require_once('app/config/database.php');
 
 $db = (new Database())->getConnection();
-$categoryModel = new CategoryModel($db);
-$categories = $categoryModel->getCategories();
+$subjectModel = new SubjectModel($db);
+$subjects = $subjectModel->getSubjects();
 ?>
 
 <!DOCTYPE html>
@@ -12,141 +12,138 @@ $categories = $categoryModel->getCategories();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý sản phẩm</title>
+    <title>Hệ thống Thư viện Thông minh</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     <style>
-        
-        /* Navbar */
-        .navbar {
-            background: linear-gradient(to right, #00bcd4, #00796b);
-            color: white;
-            border-radius: 10px;
-            padding: 10px 0;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e0f2f7 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        .navbar-nav .nav-link {
+        .navbar {
+            background: linear-gradient(to right, #4CAF50, #2E8B57);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .navbar-brand, .navbar-nav .nav-link {
             color: white !important;
             font-weight: bold;
-            transition: color 0.3s ease;
-            white-space: nowrap;
-            padding: 10px 15px;
+            transition: all 0.3s ease;
         }
         .navbar-nav .nav-link:hover {
-            color: #ff9800 !important;
+            color: #FFEB3B !important;
+            transform: translateY(-2px);
         }
-        .form-inline {
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .dropdown-item:hover {
+            background-color: #e8f5e9;
+            color: #2E8B57;
+        }
+        .form-inline .form-control {
+            border-radius: 20px;
+            border: none;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .form-inline .btn-outline-success {
+            border-radius: 20px;
+            background-color: #1976D2;
+            border-color: #1976D2;
+            color: white;
+            padding: 8px 15px;
+            margin-left: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .form-inline .btn-outline-success:hover {
+            background-color: #1565C0;
+            border-color: #1565C0;
+        }
+        .container.mt-4 {
+            flex: 1;
+        }
+        .search-form-header {
             display: flex;
             align-items: center;
             justify-content: flex-end;
-        }
-        .form-control {
-            border-radius: 30px;
-            padding: 10px 20px;
-            width: 250px;
-            background: #ffffff;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-        .form-control:focus {
-            border-color: #00bcd4;
-            box-shadow: 0px 0px 15px rgba(0, 188, 212, 0.4);
-        }
-        .btn-outline-success {
-            border-radius: 25px;
-            padding: 10px 20px;
-            background: linear-gradient(to right, #00bcd4, #00796b);
-            color: white;
-            margin-left: -5px;
-        }
-        .btn-outline-success:hover {
-            background: linear-gradient(to left, #00bcd4, #00796b);
-        }
-        .navbar-toggler {
-            border-color: #ffffff;
-        }
-        .navbar-toggler-icon {
-            background-color: #ffffff;
+            width: 100%;
         }
     </style>
 </head>
 <body>
 
-
-
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
+            <a class="navbar-brand" href="/">📚 Thư viện Thông minh</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/Product/">Danh sách sản phẩm</a>
+                        <a class="nav-link" href="/Book/">Danh sách sách</a>
                     </li>
-                    
 
-                    <!-- Dropdown Quản lý danh mục -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Danh Mục
+                        <a class="nav-link dropdown-toggle" href="#" id="subjectDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Chủ đề / Ngành nghề
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="categoryDropdown">
-                            <?php if (empty($categories)) : ?>
-                                <p class="dropdown-item text-muted">Chưa có danh mục nào</p>
+                        <div class="dropdown-menu" aria-labelledby="subjectDropdown">
+                            <?php if (empty($subjects)) : ?>
+                                <p class="dropdown-item text-muted">Chưa có chủ đề nào</p>
                             <?php else : ?>
-                                <?php foreach ($categories as $category) : ?>
-                                    <a class="dropdown-item" href="/Product?category_id=<?= htmlspecialchars($category->id) ?>">
-                                        <?= htmlspecialchars($category->name) ?>
+                                <?php foreach ($subjects as $subject) : ?>
+                                    <a class="dropdown-item" href="/Book?subject_id=<?= htmlspecialchars($subject->id) ?>">
+                                        <?= htmlspecialchars($subject->name) ?>
                                     </a>
                                 <?php endforeach; ?>
                             <?php endif; ?>
 
                             <div class="dropdown-divider"></div>
 
-                            <!-- Chỉ admin mới thấy "Quản Lý Danh Mục" -->
                             <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') : ?>
-                                <a class="dropdown-item" href="/Category/">Quản Lý Danh Mục</a>
+                                <a class="dropdown-item" href="/Subject/">Quản Lý Chủ đề</a>
                             <?php endif; ?>
                         </div>
                     </li>
 
-                    <!-- Chỉ admin mới thấy -->
                     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') : ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Product/add">Thêm sản phẩm</a>
+                            <a class="nav-link" href="/Book/add">Thêm sách</a>
                         </li>
                     <?php endif; ?>
 
-                    <!-- Chỉ user hoặc admin mới thấy "Giỏ hàng" -->
-                    <?php if (isset($_SESSION['role']) && ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'user')) : ?>
+                    <?php if (isset($_SESSION['username'])) : ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Product/cart">Giỏ hàng</a>
+                            <a class="nav-link" href="/Book/myBorrowedBooks">Sách của tôi</a>
                         </li>
-                      
+                        <li class="nav-item">
+                            <a class="nav-link" href="/account/profile">Hồ sơ của tôi</a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
 
+                <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/Product/checkout">Thanh Toán</a>
-                    </li>
-                    <?php endif; ?>  
-                    <!-- Thanh tìm kiếm -->
-                    <li class="nav-item">
-                        <form class="form-inline" action="/Product/search" method="get">
-                            <input class="form-control mr-sm-2" type="search" placeholder="Tìm sản phẩm" aria-label="Search" name="search">
+                        <form class="form-inline search-form-header" action="/Book" method="get">
+                            <input class="form-control mr-sm-2" type="search" placeholder="Tìm sách, tác giả..." aria-label="Search" name="search">
                             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Tìm</button>
                         </form>
                     </li>
 
-                    <!-- Hiển thị username nếu đã đăng nhập -->
                     <li class="nav-item">
                         <?php if (isset($_SESSION['username'])) : ?>
-                            <a class="nav-link"><?= htmlspecialchars($_SESSION['username']) ?></a>
+                            <a class="nav-link" href="/account/profile">Xin chào, <?= htmlspecialchars($_SESSION['username']) ?></a>
                         <?php else : ?>
                             <a class="nav-link" href="/account/login">Đăng nhập</a>
                         <?php endif; ?>
                     </li>
 
-                    <!-- Nút logout chỉ hiển thị khi đã đăng nhập -->
                     <li class="nav-item">
                         <?php if (isset($_SESSION['username'])) : ?>
                             <a class="nav-link" href="/account/logout">Đăng xuất</a>
@@ -157,12 +154,9 @@ $categories = $categoryModel->getCategories();
         </div>
     </nav>
 
-    <!-- Nội dung trang -->
     <div class="container mt-4">
-        <!-- Nội dung sản phẩm sẽ được hiển thị ở đây -->
     </div>
 
-    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 

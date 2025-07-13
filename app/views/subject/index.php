@@ -1,43 +1,41 @@
-<!-- app/views/category/index.php -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách danh mục</title>
+    <title>Danh sách Chủ đề / Ngành nghề</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #d3fcf7; /* Phông nền xanh nhạt */
+            background-color: #d3fcf7;
         }
         .container {
-            background-color: #ffffff; /* Màu nền của form */
+            background-color: #ffffff;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
         }
         h2 {
-            color: #00796b; /* Màu chữ tiêu đề */
+            color: #00796b;
         }
         .btn-success {
-            background-color: #00796b; /* Nút thêm danh mục */
+            background-color: #00796b;
             border-color: #00796b;
         }
         .btn-info {
-            background-color: #0288d1; /* Nút xem danh mục */
+            background-color: #0288d1;
             border-color: #0288d1;
         }
         .btn-warning {
-            background-color: #ff9800; /* Nút sửa danh mục */
+            background-color: #ff9800;
             border-color: #ff9800;
         }
         .btn-danger {
-            background-color: #f44336; /* Nút xóa danh mục */
+            background-color: #f44336;
             border-color: #f44336;
         }
         .btn-primary {
-            background-color: #0288d1; /* Nút quay lại danh sách sản phẩm */
+            background-color: #0288d1;
             border-color: #0288d1;
         }
         .btn:hover {
@@ -57,9 +55,8 @@
 <body>
 
 <div class="container mt-4">
-    <h2 class="text-center">Danh sách danh mục</h2>
+    <h2 class="text-center">Danh sách Chủ đề / Ngành nghề</h2>
 
-    <!-- Hiển thị thông báo nếu có -->
     <?php if (isset($success_message)): ?>
         <div class="alert alert-success">
             <?= htmlspecialchars($success_message); ?>
@@ -70,35 +67,32 @@
         </div>
     <?php endif; ?>
 
-    <!-- Nút Thêm danh mục mới -->
-    <a href="/Category/create" class="btn btn-success mb-3">Thêm danh mục mới</a>
+    <a href="/Subject/create" class="btn btn-success mb-3">Thêm chủ đề/ngành nghề mới</a>
 
-    <!-- Bảng hiển thị danh mục -->
     <table class="table table-bordered">
         <thead class="thead-light">
             <tr>
-                <th>Tên danh mục</th>
+                <th>Tên chủ đề/ngành nghề</th>
                 <th>Mô tả</th>
                 <th>Hành động</th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($categories as $category): ?>
+            <?php foreach ($subjects as $subject): // Đổi $categories thành $subjects và $category thành $subject ?>
                 <tr>
-                    <td><?= htmlspecialchars($category->name) ?></td>
-                    <td><?= htmlspecialchars($category->description) ?></td>
+                    <td><?= htmlspecialchars($subject->name) ?></td>
+                    <td><?= htmlspecialchars($subject->description) ?></td>
                     <td>
-                        <a href="/Category/view/<?= $category->id ?>" class="btn btn-info">Xem</a>
-                        <a href="/Category/edit/<?= $category->id ?>" class="btn btn-warning">Sửa</a>
-                        <a href="/Category/delete/<?= $category->id ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">Xóa</a>
+                        <a href="/Subject/view/<?= $subject->id ?>" class="btn btn-info">Xem</a>
+                        <a href="/Subject/edit/<?= $subject->id ?>" class="btn btn-warning">Sửa</a>
+                        <a href="/Subject/delete/<?= $subject->id ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa chủ đề này?');">Xóa</a>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 
-    <!-- Nút quay lại danh sách sản phẩm -->
-    <a href="/Product/index" class="btn btn-primary mt-3">Quay lại danh sách sản phẩm</a>       
+    <a href="/Book/index" class="btn btn-primary mt-3">Quay lại danh sách sách</a>       
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
