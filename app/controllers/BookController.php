@@ -2,28 +2,29 @@
 require_once('app/config/database.php');
 require_once('app/models/BookModel.php');
 require_once('app/models/SubjectModel.php');
-require_once('app/models/AccountModel.php'); // Cần AccountModel để lấy user_id
-// require_once('app/helpers/SessionHelper.php'); // Đảm bảo đã include nếu dùng
+require_once('app/models/AccountModel.php'); 
+// require_once('app/helpers/SessionHelper.php'); 
 
 class BookController
 {
     private $bookModel;
     private $subjectModel;
-    private $accountModel; // Khởi tạo AccountModel
+    private $accountModel; 
     private $db;
 
-    public function __construct($db) // Chú ý: __construct nhận tham số $db
+    public function __construct($db)
     {
         $this->db = $db;
         $this->bookModel = new BookModel($this->db);
         $this->subjectModel = new SubjectModel($this->db);
-        $this->accountModel = new AccountModel($this->db); // Khởi tạo AccountModel
+        $this->accountModel = new AccountModel($this->db);
     }
 
     public function index()
     {
-        $subjects = $this->subjectModel->getSubjects();
-
+        // Lấy tất cả chủ đề để truyền vào header (để hiển thị dropdown phân cấp)
+        $subjects = $this->subjectModel->getSubjects(); 
+        
         $subjectId = isset($_GET['subject_id']) ? $_GET['subject_id'] : null;
         $minYear = isset($_GET['min_year']) ? $_GET['min_year'] : null;
         $maxYear = isset($_GET['max_year']) ? $_GET['max_year'] : null;
@@ -52,7 +53,12 @@ class BookController
             echo "Bạn không có quyền thêm sách.";
             return;
         }
-        $subjects = $this->subjectModel->getSubjects();
+        $subjects = $this->subjectModel->getSubjects(); // Lấy tất cả chủ đề
+        $subjectsByParent = [];
+        foreach ($subjects as $sub) {
+            $parentId = $sub->parent_id ?? 0;
+            $subjectsByParent[$parentId][] = $sub;
+        }
         include_once 'app/views/book/add.php';
     }
 
@@ -85,16 +91,26 @@ class BookController
 
             $addResult = $this->bookModel->addBook($name, $description, $author, $publisher, $publication_year, $ISBN, $subject_id, $image, $number_of_copies);
 
-            if (is_array($addResult)) { // Kiểm tra nếu có lỗi trả về từ model
-                $errors = array_merge($errors, $addResult); // Gộp lỗi từ upload và model
-                $subjects = $this->subjectModel->getSubjects(); // Lấy lại danh mục
+            if (is_array($addResult)) {
+                $errors = array_merge($errors, $addResult);
+                $subjects = $this->subjectModel->getSubjects(); 
+                $subjectsByParent = [];
+                foreach ($subjects as $sub) {
+                    $parentId = $sub->parent_id ?? 0;
+                    $subjectsByParent[$parentId][] = $sub;
+                }
                 include 'app/views/book/add.php';
             } else if ($addResult) {
                 header('Location: /Book');
                 exit();
             } else {
                  $errors['db_error'] = "Đã xảy ra lỗi khi lưu sách vào cơ sở dữ liệu.";
-                 $subjects = $this->subjectModel->getSubjects(); // Lấy lại danh mục
+                 $subjects = $this->subjectModel->getSubjects(); 
+                 $subjectsByParent = [];
+                 foreach ($subjects as $sub) {
+                     $parentId = $sub->parent_id ?? 0;
+                     $subjectsByParent[$parentId][] = $sub;
+                 }
                  include 'app/views/book/add.php';
             }
         }
@@ -108,7 +124,12 @@ class BookController
             return;
         }
         $book = $this->bookModel->getBookById($id);
-        $subjects = $this->subjectModel->getSubjects();
+        $subjects = $this->subjectModel->getSubjects(); // Lấy tất cả chủ đề
+        $subjectsByParent = [];
+        foreach ($subjects as $sub) {
+            $parentId = $sub->parent_id ?? 0;
+            $subjectsByParent[$parentId][] = $sub;
+        }
         if ($book) {
             include 'app/views/book/edit.php';
         } else {
@@ -177,10 +198,10 @@ class BookController
         $target_file = $target_dir . basename($file["name"]);
         $fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-        if (!in_array($fileType, ["jpg", "png", "jpeg", "gif", "pdf", "doc", "docx", "txt"])) { // Mở rộng loại file cho thư viện
+        if (!in_array($fileType, ["jpg", "png", "jpeg", "gif", "pdf", "doc", "docx", "txt"])) { 
             throw new Exception("Chỉ cho phép các định dạng ảnh (JPG, JPEG, PNG, GIF) và tài liệu (PDF, DOC, DOCX, TXT).");
         }
-        if ($file["size"] > 20 * 1024 * 1024) { // Tăng giới hạn kích thước file lên 20MB
+        if ($file["size"] > 20 * 1024 * 1024) { 
             throw new Exception("File có kích thước quá lớn (tối đa 20MB).");
         }
         if (!move_uploaded_file($file["tmp_name"], $target_file)) {
@@ -204,21 +225,7 @@ class BookController
         }
 
         if ($book->available_copies > 0) {
-            // Thực hiện logic mượn sách
-            // Giả định bạn có một BorrowRecordModel để quản lý các bản ghi mượn
-            // require_once('app/models/BorrowRecordModel.php');
-            // $borrowRecordModel = new BorrowRecordModel($this->db);
-
-            // Kiểm tra xem người dùng đã mượn cuốn sách này chưa và chưa trả
-            // $existingBorrow = $borrowRecordModel->getBorrowedBookByUserAndBook($_SESSION['user_id'], $id);
-            // if ($existingBorrow && $existingBorrow->status === 'borrowed') {
-            //     echo "<script>alert('Bạn đã mượn cuốn sách này rồi!'); window.location.href='/Book/show/{$id}';</script>";
-            //     exit();
-            // }
-
             if ($this->bookModel->decreaseAvailableCopies($id)) {
-                // Thêm bản ghi mượn vào DB
-                // $borrowRecordModel->addRecord($_SESSION['user_id'], $id, date('Y-m-d'), date('Y-m-d', strtotime('+14 days')));
                 echo "<script>alert('Bạn đã mượn sách thành công!'); window.location.href='/Book';</script>";
             } else {
                 echo "<script>alert('Không thể mượn sách. Vui lòng thử lại.'); window.location.href='/Book';</script>";
@@ -235,21 +242,7 @@ class BookController
             exit();
         }
 
-        // Logic trả sách: tăng available_copies, cập nhật borrow_records
-        // require_once('app/models/BorrowRecordModel.php');
-        // $borrowRecordModel = new BorrowRecordModel($this->db);
-
-        // Giả định bạn tìm bản ghi mượn của người dùng và sách này
-        // $borrowRecord = $borrowRecordModel->getBorrowedBookByUserAndBook($_SESSION['user_id'], $id);
-
-        // if (!$borrowRecord || $borrowRecord->status !== 'borrowed') {
-        //     echo "<script>alert('Bạn không có bản ghi mượn nào cho cuốn sách này.'); window.location.href='/Book/myBorrowedBooks';</script>";
-        //     exit();
-        // }
-
         if ($this->bookModel->increaseAvailableCopies($id)) {
-            // Cập nhật bản ghi mượn là đã trả
-            // $borrowRecordModel->updateRecordAsReturned($borrowRecord->id);
             echo "<script>alert('Bạn đã trả sách thành công!'); window.location.href='/Book';</script>";
         } else {
             echo "<script>alert('Không thể trả sách. Vui lòng thử lại.'); window.location.href='/Book';</script>";
@@ -262,12 +255,6 @@ class BookController
             header('Location: /account/login');
             exit();
         }
-        // Lấy sách mà người dùng hiện tại đang mượn từ bảng borrow_records
-        // require_once('app/models/BorrowRecordModel.php');
-        // $borrowRecordModel = new BorrowRecordModel($this->db);
-        // $borrowedBooks = $borrowRecordModel->getBorrowedBooksByUserId($_SESSION['user_id']);
-        
-        // Hiện tại chỉ là dữ liệu giả định vì BorrowRecordModel chưa có
         $borrowedBooks = []; 
         
         include 'app/views/book/borrowed_list.php';

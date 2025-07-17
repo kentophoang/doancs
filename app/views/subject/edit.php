@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cập nhật chủ đề / ngành nghề</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="[https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css](https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css)" rel="stylesheet">
     <style>
         body {
             background-color: #d3fcf7;
@@ -55,7 +55,22 @@
             <label for="description">Mô tả</label>
             <textarea class="form-control" id="description" name="description" required><?= isset($_POST['description']) ? htmlspecialchars($_POST['description']) : htmlspecialchars($subject->description) ?></textarea>
         </div>
-        
+        <div class="form-group">
+            <label for="parent_id">Chủ đề cha (tùy chọn)</label>
+            <select class="form-control" id="parent_id" name="parent_id">
+                <option value="">— Chọn chủ đề cha —</option>
+                <?php foreach ($parentSubjects as $pSubject): // $parentSubjects và $subject được truyền từ SubjectController ?>
+                    <?php if ($pSubject->id != $subject->id): // Ngăn không cho chọn chính nó làm chủ đề cha ?>
+                        <option value="<?= htmlspecialchars($pSubject->id) ?>"
+                            <?= (isset($_POST['parent_id']) && $_POST['parent_id'] == $pSubject->id) ? 'selected' : '' ?>
+                            <?= (!isset($_POST['parent_id']) && $subject->parent_id == $pSubject->id) ? 'selected' : '' ?>
+                        >
+                            <?= htmlspecialchars($pSubject->name) ?>
+                        </option>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </select>
+        </div>
         <button type="submit" class="btn btn-primary">Cập nhật chủ đề</button>
     </form>
 
@@ -64,9 +79,9 @@
 
 </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="[https://code.jquery.com/jquery-3.5.1.min.js](https://code.jquery.com/jquery-3.5.1.min.js)"></script>
+<script src="[https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js](https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js)"></script>
+<script src="[https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js](https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js)"></script>
 
 </body>
 </html>

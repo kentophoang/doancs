@@ -4,7 +4,13 @@ require_once('app/config/database.php');
 
 $db = (new Database())->getConnection();
 $subjectModel = new SubjectModel($db);
-$subjects = $subjectModel->getSubjects();
+$subjects = $subjectModel->getSubjects(); // Lấy tất cả chủ đề
+// Tổ chức subjects theo parent_id
+$subjectsByParent = [];
+foreach ($subjects as $sub) {
+    $parentId = $sub->parent_id ?? 0; // Gán 0 cho chủ đề cấp cao nhất nếu parent_id là NULL
+    $subjectsByParent[$parentId][] = $sub;
+}
 ?>
 
 <!DOCTYPE html>
@@ -13,8 +19,8 @@ $subjects = $subjectModel->getSubjects();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Thư viện Thông minh</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="[https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css](https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css)" rel="stylesheet">
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css)">
 
     <style>
         body {
@@ -94,15 +100,28 @@ $subjects = $subjectModel->getSubjects();
                             Chủ đề / Ngành nghề
                         </a>
                         <div class="dropdown-menu" aria-labelledby="subjectDropdown">
-                            <?php if (empty($subjects)) : ?>
+                            <?php
+                            // Hàm đệ quy để hiển thị chủ đề và chủ đề con
+                            function displaySubjectDropdown($subjectsByParentArray, $parentId, $indent = "") {
+                                if (!isset($subjectsByParentArray[$parentId])) {
+                                    return;
+                                }
+                                foreach ($subjectsByParentArray[$parentId] as $subject) {
+                                    echo '<a class="dropdown-item" href="/Book?subject_id=' . htmlspecialchars($subject->id) . '">';
+                                    echo $indent . htmlspecialchars($subject->name);
+                                    echo '</a>';
+                                    displaySubjectDropdown($subjectsByParentArray, $subject->id, $indent . "&nbsp;&nbsp;&nbsp;&nbsp;"); // Thụt lề cho chủ đề con
+                                }
+                            }
+
+                            if (empty($subjectsByParent[0]) && empty($subjectsByParent[null])) : // Kiểm tra cả parent_id là 0 hoặc rỗng/NULL cho chủ đề cha
+                            ?>
                                 <p class="dropdown-item text-muted">Chưa có chủ đề nào</p>
-                            <?php else : ?>
-                                <?php foreach ($subjects as $subject) : ?>
-                                    <a class="dropdown-item" href="/Book?subject_id=<?= htmlspecialchars($subject->id) ?>">
-                                        <?= htmlspecialchars($subject->name) ?>
-                                    </a>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                            <?php else :
+                                // Hiển thị các chủ đề cấp cao nhất (parent_id là NULL hoặc 0)
+                                displaySubjectDropdown($subjectsByParent, 0); // Đối với parent_id = 0
+                                displaySubjectDropdown($subjectsByParent, null); // Đối với parent_id = NULL
+                            endif; ?>
 
                             <div class="dropdown-divider"></div>
 
@@ -157,8 +176,8 @@ $subjects = $subjectModel->getSubjects();
     <div class="container mt-4">
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="[https://code.jquery.com/jquery-3.5.1.min.js](https://code.jquery.com/jquery-3.5.1.min.js)"></script>
+    <script src="[https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js](https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js)"></script>
 
 </body>
 </html>

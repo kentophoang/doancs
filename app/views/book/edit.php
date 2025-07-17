@@ -65,12 +65,25 @@
                         <div class="form-group mb-3">
                             <label for="subject_id">Chủ đề / Ngành nghề:</label>
                             <select id="subject_id" name="subject_id" class="form-control fs-5" required>
-                                <?php foreach ($subjects as $subject): ?>
-                                    <option value="<?php echo $subject->id; ?>"
-                                            <?php echo $subject->id == $book->subject_id ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($subject->name, ENT_QUOTES, 'UTF-8'); ?>
-                                    </option>
-                                <?php endforeach; ?>
+                                <?php
+                                    // Hàm đệ quy để hiển thị options có thụt lề
+                                    function renderSubjectOptionsEdit($subjectsByParentArray, $parentId, $level = 0, $selectedSubjectId = null) {
+                                        if (!isset($subjectsByParentArray[$parentId])) {
+                                            return;
+                                        }
+                                        foreach ($subjectsByParentArray[$parentId] as $subject) {
+                                            $indent = str_repeat("&nbsp;&nbsp;&nbsp;&nbsp;", $level);
+                                            $selected = ($selectedSubjectId == $subject->id) ? 'selected' : '';
+                                            echo '<option value="' . htmlspecialchars($subject->id) . '" ' . $selected . '>' . $indent . htmlspecialchars($subject->name) . '</option>';
+                                            renderSubjectOptionsEdit($subjectsByParentArray, $subject->id, $level + 1, $selectedSubjectId);
+                                        }
+                                    }
+
+                                    // Render các chủ đề cấp cao nhất (parent_id là NULL hoặc 0)
+                                    // $subjectsByParent và $book->subject_id phải được truyền từ controller
+                                    renderSubjectOptionsEdit($subjectsByParent, 0, 0, $book->subject_id); // Đối với parent_id = 0
+                                    renderSubjectOptionsEdit($subjectsByParent, null, 0, $book->subject_id); // Đối với parent_id = NULL
+                                ?>
                             </select>
                         </div>
 
