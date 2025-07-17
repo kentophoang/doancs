@@ -3,7 +3,7 @@
 <div class="checkout-container">
     <div class="checkout-content">
         <h1 class="text-center">💳 Thanh toán</h1>
-        <form action="/Product/processCheckout" method="POST">
+        <form action="/Book/processCheckout" method="POST">
             <div class="form-group">
                 <label for="name">Họ tên:</label>
                 <input type="text" id="name" name="name" class="form-control" required>
@@ -21,7 +21,7 @@
 
             <div class="text-center mt-3">
                 <button type="submit" class="btn btn-primary">Thanh toán</button>
-                <a href="/Product/cart" class="btn btn-secondary">Quay lại giỏ hàng</a>
+                <a href="/Book/cart" class="btn btn-secondary">Quay lại giỏ hàng</a>
             </div>
         </form>
     </div>

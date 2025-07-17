@@ -1,11 +1,9 @@
-<!-- app/views/category/list.php -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách danh mục</title>
+    <title>Danh sách chủ đề</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -46,9 +44,8 @@
 <body>
 
 <div class="container mt-4">
-    <h2 class="text-center">Danh sách danh mục</h2>
+    <h2 class="text-center">Danh sách chủ đề</h2>
 
-    <!-- Hiển thị thông báo nếu có -->
     <?php if (isset($success_message)): ?>
         <div class="alert alert-success">
             <?= htmlspecialchars($success_message); ?>
@@ -59,23 +56,22 @@
         </div>
     <?php endif; ?>
 
-    <a href="/Category/add" class="btn btn-success mb-3">Thêm danh mục mới</a>
+    <a href="/Subject/create" class="btn btn-success mb-3">Thêm chủ đề mới</a>
 
-    <!-- Bảng hiển thị danh mục -->
     <table class="table">
         <thead>
             <tr>
-                <th>Tên danh mục</th>
+                <th>Tên chủ đề</th>
                 <th>Hành động</th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($categories as $category) : ?>
+            <?php foreach ($subjects as $subject) : // Changed $categories to $subjects ?>
                 <tr>
-                    <td><?= htmlspecialchars($category->name) ?></td>
+                    <td><?= htmlspecialchars($subject->name) ?></td>
                     <td>
-                        <a href="/Category/edit/<?= $category->id ?>" class="btn btn-warning">Sửa</a>
-                        <a href="/Category/delete/<?= $category->id ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">Xóa</a>
+                        <a href="/Subject/edit/<?= $subject->id ?>" class="btn btn-warning">Sửa</a>
+                        <a href="/Subject/delete/<?= $subject->id ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa chủ đề này?');">Xóa</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

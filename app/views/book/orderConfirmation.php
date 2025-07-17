@@ -5,7 +5,7 @@
         <h1 class="text-center text-success">✅ Xác nhận đơn hàng</h1>
         <p class="text-center">🎉 Cảm ơn bạn đã đặt hàng! Đơn hàng của bạn đã được xử lý thành công.</p>
         <div class="text-center">
-            <a href="/Product/" class="btn btn-primary mt-3">🛍️ Tiếp tục mua sắm</a>
+            <a href="/Book/" class="btn btn-primary mt-3">🛍️ Tiếp tục mua sắm</a>
         </div>
     </div>
 </div>

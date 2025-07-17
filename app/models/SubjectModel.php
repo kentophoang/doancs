@@ -1,5 +1,3 @@
-
-```php
 <?php
 
 class SubjectModel
@@ -86,7 +84,7 @@ class SubjectModel
     public function deleteSubject($id)
     {
         try {
-            // Khi xóa một chủ đề, các chủ đề con của nó sẽ có parent_id thành NULL (do ON DELETE SET NULL)
+            // When deleting a subject, its child subjects will have their parent_id set to NULL (due to ON DELETE SET NULL)
             $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);

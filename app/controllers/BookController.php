@@ -1,9 +1,5 @@
 <?php
-require_once('app/config/database.php');
-require_once('app/models/BookModel.php');
-require_once('app/models/SubjectModel.php');
-require_once('app/models/AccountModel.php'); 
-// require_once('app/helpers/SessionHelper.php'); 
+require_once('app/helpers/SessionHelper.php'); 
 
 class BookController
 {
@@ -22,8 +18,7 @@ class BookController
 
     public function index()
     {
-        // Lấy tất cả chủ đề để truyền vào header (để hiển thị dropdown phân cấp)
-        $subjects = $this->subjectModel->getSubjects(); 
+        SessionHelper::start();
         
         $subjectId = isset($_GET['subject_id']) ? $_GET['subject_id'] : null;
         $minYear = isset($_GET['min_year']) ? $_GET['min_year'] : null;
@@ -33,39 +28,67 @@ class BookController
 
         $books = $this->bookModel->getBooks($subjectId, $minYear, $maxYear, $searchTerm, $sortOrder);
 
+        // Fetch subjects again for the filter dropdown if needed, though header might provide it
+        $subjects = $this->subjectModel->getSubjects();
+
+        ob_start(); // Start output buffering for the view content
         include 'app/views/book/list.php';
+        $main_content = ob_get_clean(); // Get the buffered content
+
+        if (SessionHelper::isAdmin()) {
+            include 'app/views/shares/admin_layout.php'; // Use admin layout for admins
+        } else {
+            // If not admin, you would typically include a public layout or render directly
+            // For now, if not admin, we assume list.php already includes its own header/footer
+            // But with the current change, list.php is stripped of those.
+            // A dedicated public layout (e.g., public_layout.php) would be ideal here.
+            // For now, to make it work, we will just echo the content.
+            echo $main_content; // This is a fallback, ideally wrap in a public layout.
+        }
     }
 
     public function show($id)
     {
+        SessionHelper::start();
         $book = $this->bookModel->getBookById($id);
+        ob_start();
         if ($book) {
             include 'app/views/book/show.php';
         } else {
             echo "Không tìm thấy sách.";
         }
+        $main_content = ob_get_clean();
+
+        if (SessionHelper::isAdmin()) {
+            include 'app/views/shares/admin_layout.php';
+        } else {
+            echo $main_content;
+        }
     }
 
     public function add()
     {
- 
-        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+        SessionHelper::start(); 
+        if (!SessionHelper::isAdmin()) {
             echo "Bạn không có quyền thêm sách.";
             return;
         }
-        $subjects = $this->subjectModel->getSubjects(); // Lấy tất cả chủ đề
+        $subjects = $this->subjectModel->getSubjects(); 
         $subjectsByParent = [];
         foreach ($subjects as $sub) {
             $parentId = $sub->parent_id ?? 0;
             $subjectsByParent[$parentId][] = $sub;
         }
+        ob_start();
         include_once 'app/views/book/add.php';
+        $main_content = ob_get_clean();
+        include 'app/views/shares/admin_layout.php';
     }
 
     public function save()
     {
- 
-        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+        SessionHelper::start(); 
+        if (!SessionHelper::isAdmin()) {
             echo "Bạn không có quyền thêm sách.";
             return;
         }
@@ -99,7 +122,10 @@ class BookController
                     $parentId = $sub->parent_id ?? 0;
                     $subjectsByParent[$parentId][] = $sub;
                 }
+                ob_start();
                 include 'app/views/book/add.php';
+                $main_content = ob_get_clean();
+                include 'app/views/shares/admin_layout.php';
             } else if ($addResult) {
                 header('Location: /Book');
                 exit();
@@ -111,36 +137,42 @@ class BookController
                      $parentId = $sub->parent_id ?? 0;
                      $subjectsByParent[$parentId][] = $sub;
                  }
+                 ob_start();
                  include 'app/views/book/add.php';
+                 $main_content = ob_get_clean();
+                 include 'app/views/shares/admin_layout.php';
             }
         }
     }
 
     public function edit($id)
     {
- 
-        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+        SessionHelper::start(); 
+        if (!SessionHelper::isAdmin()) {
             echo "Bạn không có quyền sửa sách.";
             return;
         }
         $book = $this->bookModel->getBookById($id);
-        $subjects = $this->subjectModel->getSubjects(); // Lấy tất cả chủ đề
+        $subjects = $this->subjectModel->getSubjects();
         $subjectsByParent = [];
         foreach ($subjects as $sub) {
             $parentId = $sub->parent_id ?? 0;
             $subjectsByParent[$parentId][] = $sub;
         }
+        ob_start();
         if ($book) {
             include 'app/views/book/edit.php';
         } else {
             echo "Không tìm thấy sách.";
         }
+        $main_content = ob_get_clean();
+        include 'app/views/shares/admin_layout.php';
     }
 
     public function update()
     {
- 
-        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+        SessionHelper::start(); 
+        if (!SessionHelper::isAdmin()) {
             echo "Bạn không có quyền sửa sách.";
             return;
         }
@@ -169,15 +201,18 @@ class BookController
                 header('Location: /Book');
                 exit();
             } else {
+                ob_start();
                 echo "Đã xảy ra lỗi khi lưu sách.";
+                $main_content = ob_get_clean();
+                include 'app/views/shares/admin_layout.php';
             }
         }
     }
 
     public function delete($id)
     {
- 
-        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+        SessionHelper::start(); 
+        if (!SessionHelper::isAdmin()) {
             echo "Bạn không có quyền xóa sách.";
             return;
         }
@@ -185,7 +220,10 @@ class BookController
             header('Location: /Book');
             exit();
         } else {
+            ob_start();
             echo "Đã xảy ra lỗi khi xóa sách.";
+            $main_content = ob_get_clean();
+            include 'app/views/shares/admin_layout.php';
         }
     }
 
@@ -210,11 +248,9 @@ class BookController
         return $target_file;
     }
 
-    // --- Các phương thức mới cho chức năng thư viện ---
-
     public function borrow($id) {
- 
-        if (!isset($_SESSION['username']) || !isset($_SESSION['user_id'])) {
+        SessionHelper::start(); 
+        if (!SessionHelper::isLoggedIn()) {
             header('Location: /account/login');
             exit();
         }
@@ -236,8 +272,8 @@ class BookController
     }
 
     public function returnBook($id) {
- 
-        if (!isset($_SESSION['username']) || !isset($_SESSION['user_id'])) {
+        SessionHelper::start(); 
+        if (!SessionHelper::isLoggedIn()) {
             header('Location: /account/login');
             exit();
         }
@@ -250,14 +286,21 @@ class BookController
     }
 
     public function myBorrowedBooks() {
- 
-        if (!isset($_SESSION['username']) || !isset($_SESSION['user_id'])) {
+        SessionHelper::start(); 
+        if (!SessionHelper::isLoggedIn()) {
             header('Location: /account/login');
             exit();
         }
         $borrowedBooks = []; 
-        
+        ob_start();
         include 'app/views/book/borrowed_list.php';
+        $main_content = ob_get_clean();
+        // Since myBorrowedBooks might be accessible to non-admin, a public layout would be better here.
+        // For now, if admin, use admin_layout, else just echo.
+        if (SessionHelper::isAdmin()) {
+            include 'app/views/shares/admin_layout.php';
+        } else {
+            echo $main_content; // Fallback for public users
+        }
     }
 }
-?>

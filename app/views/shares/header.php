@@ -1,183 +1,124 @@
 <?php
-require_once('app/models/SubjectModel.php');
-require_once('app/config/database.php');
-
-$db = (new Database())->getConnection();
-$subjectModel = new SubjectModel($db);
-$subjects = $subjectModel->getSubjects(); // Lấy tất cả chủ đề
-// Tổ chức subjects theo parent_id
-$subjectsByParent = [];
-foreach ($subjects as $sub) {
-    $parentId = $sub->parent_id ?? 0; // Gán 0 cho chủ đề cấp cao nhất nếu parent_id là NULL
-    $subjectsByParent[$parentId][] = $sub;
-}
+// Tệp này chỉ chứa phần <head> và navbar chính của ứng dụng.
+// Nó được include MỘT LẦN ở đầu index.php.
+// KHÔNG BAO GỒM biến $main_content.
+// KHÔNG include các tệp header/footer khác.
+// Các require_once và session_start() đã được chuyển sang index.php để tránh output sớm.
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Thư viện Thông minh</title>
-    <link href="[https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css](https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css)" rel="stylesheet">
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css)">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f0f8ff 0%, #e0f2f7 100%);
+            background: #f0f2f5; /* Admin dashboard background */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
         .navbar {
-            background: linear-gradient(to right, #4CAF50, #2E8B57);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: #ffffff; /* White background for admin header */
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important; /* Admin card shadow */
+            padding: 0.5rem 1.5rem; /* Adjusted padding */
+            border-bottom: 1px solid #e3e6f0; /* Light border at bottom */
+            z-index: 1030; /* Higher than sidebar */
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
         }
-        .navbar-brand, .navbar-nav .nav-link {
-            color: white !important;
+        .navbar-brand {
+            color: #34495e !important; /* Dark text for brand */
             font-weight: bold;
+            font-size: 1.3rem; /* Slightly smaller for admin header */
             transition: all 0.3s ease;
         }
-        .navbar-nav .nav-link:hover {
-            color: #FFEB3B !important;
-            transform: translateY(-2px);
-        }
-        .dropdown-menu {
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .dropdown-item:hover {
-            background-color: #e8f5e9;
-            color: #2E8B57;
+        .navbar-brand:hover {
+            color: #2c3e50 !important;
         }
         .form-inline .form-control {
-            border-radius: 20px;
-            border: none;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 5px; /* Less rounded than public */
+            border: 1px solid #ced4da;
+            box-shadow: none;
+            padding: 0.375rem 0.75rem; /* Standard form control padding */
+            width: 250px; /* Specific width for screenshot match */
         }
-        .form-inline .btn-outline-success {
-            border-radius: 20px;
-            background-color: #1976D2;
-            border-color: #1976D2;
+        .form-inline .btn-search {
+            background-color: #4e73df; /* Blue search button matching admin theme */
+            border-color: #4e73df;
             color: white;
-            padding: 8px 15px;
+            padding: 0.375rem 0.75rem;
+            border-radius: 5px;
             margin-left: 5px;
             transition: background-color 0.3s ease;
         }
-        .form-inline .btn-outline-success:hover {
-            background-color: #1565C0;
-            border-color: #1565C0;
+        .form-inline .btn-search:hover {
+            background-color: #2e59d9;
+            border-color: #2e59d9;
         }
-        .container.mt-4 {
-            flex: 1;
-        }
-        .search-form-header {
+        .admin-profile-header {
+            color: #34495e; /* Dark text */
+            font-weight: bold;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            width: 100%;
+            margin-left: 15px;
+        }
+        .admin-profile-header i {
+            margin-right: 8px;
+            color: #6c757d; /* Lighter icon color */
+        }
+        .btn-logout-header {
+            background-color: #e74a3b; /* Red logout button */
+            border-color: #e74a3b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .btn-logout-header:hover {
+            background-color: #c0392b;
+            border-color: #c0392b;
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">📚 Thư viện Thông minh</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">📚 LIBSMART</a>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Book/">Danh sách sách</a>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="subjectDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Chủ đề / Ngành nghề
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="subjectDropdown">
-                            <?php
-                            // Hàm đệ quy để hiển thị chủ đề và chủ đề con
-                            function displaySubjectDropdown($subjectsByParentArray, $parentId, $indent = "") {
-                                if (!isset($subjectsByParentArray[$parentId])) {
-                                    return;
-                                }
-                                foreach ($subjectsByParentArray[$parentId] as $subject) {
-                                    echo '<a class="dropdown-item" href="/Book?subject_id=' . htmlspecialchars($subject->id) . '">';
-                                    echo $indent . htmlspecialchars($subject->name);
-                                    echo '</a>';
-                                    displaySubjectDropdown($subjectsByParentArray, $subject->id, $indent . "&nbsp;&nbsp;&nbsp;&nbsp;"); // Thụt lề cho chủ đề con
-                                }
-                            }
-
-                            if (empty($subjectsByParent[0]) && empty($subjectsByParent[null])) : // Kiểm tra cả parent_id là 0 hoặc rỗng/NULL cho chủ đề cha
-                            ?>
-                                <p class="dropdown-item text-muted">Chưa có chủ đề nào</p>
-                            <?php else :
-                                // Hiển thị các chủ đề cấp cao nhất (parent_id là NULL hoặc 0)
-                                displaySubjectDropdown($subjectsByParent, 0); // Đối với parent_id = 0
-                                displaySubjectDropdown($subjectsByParent, null); // Đối với parent_id = NULL
-                            endif; ?>
-
-                            <div class="dropdown-divider"></div>
-
-                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') : ?>
-                                <a class="dropdown-item" href="/Subject/">Quản Lý Chủ đề</a>
-                            <?php endif; ?>
-                        </div>
-                    </li>
-
-                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') : ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/Book/add">Thêm sách</a>
-                        </li>
-                    <?php endif; ?>
-
-                    <?php if (isset($_SESSION['username'])) : ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/Book/myBorrowedBooks">Sách của tôi</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/account/profile">Hồ sơ của tôi</a>
-                        </li>
-                    <?php endif; ?>
-                </ul>
-
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <form class="form-inline search-form-header" action="/Book" method="get">
-                            <input class="form-control mr-sm-2" type="search" placeholder="Tìm sách, tác giả..." aria-label="Search" name="search">
-                            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Tìm</button>
+                <ul class="navbar-nav ml-auto align-items-center">
+                    <li class="nav-item d-flex align-items-center">
+                        <form class="form-inline my-2 my-lg-0 mr-3" action="/Book" method="get">
+                            <input class="form-control mr-sm-2" type="search" placeholder="Tìm kiếm sách, thành viên, hoặc ISBN..." aria-label="Search" name="search">
+                            <button class="btn btn-search my-2 my-sm-0" type="submit">Tìm</button>
                         </form>
                     </li>
-
-                    <li class="nav-item">
-                        <?php if (isset($_SESSION['username'])) : ?>
-                            <a class="nav-link" href="/account/profile">Xin chào, <?= htmlspecialchars($_SESSION['username']) ?></a>
-                        <?php else : ?>
-                            <a class="nav-link" href="/account/login">Đăng nhập</a>
-                        <?php endif; ?>
-                    </li>
-
-                    <li class="nav-item">
-                        <?php if (isset($_SESSION['username'])) : ?>
-                            <a class="nav-link" href="/account/logout">Đăng xuất</a>
-                        <?php endif; ?>
-                    </li>
+                    <?php if (isset($_SESSION['username']) && isset($_SESSION['role']) && $_SESSION['role'] === 'admin') : ?>
+                        <li class="nav-item admin-profile-header">
+                            <i class="fas fa-user-circle"></i> Quản trị viên, <?= htmlspecialchars($_SESSION['username']) ?>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-logout-header" href="/account/logout">Đăng xuất</a>
+                        </li>
+                    <?php else : ?>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-header btn-login mr-2" href="/account/login">Đăng nhập</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-header btn-register" href="/account/register">Đăng ký</a>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>
     </nav>
-
-    <div class="container mt-4">
-    </div>
-
-    <script src="[https://code.jquery.com/jquery-3.5.1.min.js](https://code.jquery.com/jquery-3.5.1.min.js)"></script>
-    <script src="[https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js](https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js)"></script>
-
-</body>
-</html>

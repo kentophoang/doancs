@@ -18,7 +18,7 @@
 
                                 <?php if (!empty($item['image'])): ?>
                                     <img src="/<?php echo htmlspecialchars($item['image'], ENT_QUOTES, 'UTF-8'); ?>" 
-                                        alt="Product Image" class="img-thumbnail product-img">
+                                        alt="Book Image" class="img-thumbnail product-img">
                                 <?php endif; ?>
 
                                 <p>Giá: <strong><?php echo number_format($item['price'], 0, ',', '.'); ?> đ </strong></p>
@@ -45,8 +45,8 @@
                 <h3 class="text-right mt-3">Tổng tiền: <span id="total"><?php echo number_format($total, 0, ',', '.'); ?> đ</span></h3>
 
                 <div class="text-center mt-3">
-                    <a href="/Product" class="btn btn-secondary">Tiếp tục mua sắm</a>
-                    <a href="/Product/checkout" class="btn btn-success">Thanh Toán</a>
+                    <a href="/Book" class="btn btn-secondary">Tiếp tục mua sắm</a>
+                    <a href="/Book/checkout" class="btn btn-success">Thanh Toán</a>
                 </div>
             </div>
         <?php else: ?>
@@ -141,7 +141,7 @@ $(document).ready(function() {
         input.val(newQuantity);
 
         $.ajax({
-            url: "/Product/updateCart",
+            url: "/Book/updateCart", // Changed from Product/updateCart
             method: "POST",
             data: { product_id: product_id, quantity: newQuantity },
             dataType: "json",
@@ -160,7 +160,7 @@ $(document).ready(function() {
 
         if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
             $.ajax({
-                url: "/Product/removeFromCart",
+                url: "/Book/removeFromCart", // Changed from Product/removeFromCart
                 method: "POST",
                 data: { product_id: product_id },
                 dataType: "json",

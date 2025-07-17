@@ -15,12 +15,41 @@ class AccountModel {
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    // Sửa phương thức save để thêm profession và industry
+    // New method to get all accounts
+    public function getAllAccounts($searchTerm = null, $sortBy = null, $status = null) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE 1=1";
+        $params = [];
+
+        if ($searchTerm) {
+            $query .= " AND (username LIKE ? OR fullname LIKE ?)";
+            $params[] = '%' . $searchTerm . '%';
+            $params[] = '%' . $searchTerm . '%';
+        }
+
+        // Add more filters (e.g., status) if your database supports it
+        // if ($status) {
+        //     $query .= " AND status = ?";
+        //     $params[] = $status;
+        // }
+
+        if ($sortBy == 'name_asc') {
+            $query .= " ORDER BY fullname ASC";
+        } elseif ($sortBy == 'name_desc') {
+            $query .= " ORDER BY fullname DESC";
+        } else {
+            $query .= " ORDER BY username ASC"; // Changed default sort to username
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
     public function save($username, $fullName, $password, $role = 'user', $profession = null, $industry = null) {
         if ($this->getAccountByUsername($username)) {
             return false;
         }
-        $query = "INSERT INTO " . $this->table_name . " SET username=:username, fullname=:fullname, password=:password, role=:role, profession=:profession, industry=:industry";
+        $query = "INSERT INTO " . $this->table_name . " (username, fullname, password, role, profession, industry) VALUES (:username, :fullname, :password, :role, :profession, :industry)"; // Added column names explicitly
         $stmt = $this->conn->prepare($query);
 
         $username = htmlspecialchars(strip_tags($username));
@@ -40,7 +69,6 @@ class AccountModel {
         return $stmt->execute();
     }
 
-    // Phương thức mới: Cập nhật thông tin tài khoản
     public function updateAccount($id, $fullName, $profession, $industry) {
         $query = "UPDATE " . $this->table_name . " SET fullname=:fullname, profession=:profession, industry=:industry WHERE id=:id";
         $stmt = $this->conn->prepare($query);
@@ -53,4 +81,3 @@ class AccountModel {
         return $stmt->execute();
     }
 }
-?>

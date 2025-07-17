@@ -1,12 +1,15 @@
 <?php
 session_start();
-require_once 'app/models/BookModel.php';    // Đổi từ ProductModel
-require_once 'app/models/SubjectModel.php'; // Đổi từ CategoryModel
-require_once 'app/models/AccountModel.php'; // Đảm bảo AccountModel được load
+require_once 'app/models/BookModel.php';
+require_once 'app/models/SubjectModel.php';
+require_once 'app/models/AccountModel.php';
 require_once 'app/helpers/SessionHelper.php';
 require_once 'app/database/Database.php';
 
 $db = (new Database())->getConnection();
+
+// GLOBAL HEADER INCLUDED ONCE FOR THE ENTIRE APPLICATION
+include 'app/views/shares/header.php';
 
 $url = $_GET['url'] ?? '';
 $url = rtrim($url, '/');
@@ -14,7 +17,7 @@ $url = filter_var($url, FILTER_SANITIZE_URL);
 $url = explode('/', $url);
 
 // Xác định controller
-$controllerName = isset($url[0]) && $url[0] != '' ? ucfirst($url[0]) . 'Controller' : 'BookController'; // Mặc định là BookController
+$controllerName = isset($url[0]) && $url[0] != '' ? ucfirst($url[0]) . 'Controller' : 'BookController';
 
 // Xác định action
 $action = isset($url[1]) && $url[1] != '' ? $url[1] : 'index';
@@ -34,9 +37,11 @@ if (!class_exists($controllerName)) {
     die("Lỗi: Controller '$controllerName' không tồn tại!");
 }
 
-// Kiểm tra xem controller có cần kết nối DB không (hầu hết đều cần)
-// DefaultController không cần DB, các controller khác cần
-if ($controllerName === 'DefaultController') {
+// Removed the problematic global admin redirection.
+// Each admin controller/action will now manage its own access and layout inclusion.
+
+// Instantiate controller
+if ($controllerName === 'DefaultController' || $controllerName === 'AccountController') {
     $controller = new $controllerName();
 } else {
     $controller = new $controllerName($db);
@@ -50,4 +55,7 @@ if (!method_exists($controller, $action)) {
 
 $params = array_slice($url, 2);
 call_user_func_array([$controller, $action], $params);
+
+// GLOBAL FOOTER INCLUDED ONCE FOR THE ENTIRE APPLICATION
+include 'app/views/shares/footer.php';
 ?>

@@ -98,7 +98,7 @@
                             <?php endif; ?>
                         </div>
 
-                        <button type="submit" class="btn btn-success w-100 fs-5">Lưu thay đổi</button>
+                        <button type="submit" class="btn btn-primary w-100 fs-5">Lưu thay đổi</button>
                     </form>
 
                     <a href="/Book/list" class="btn btn-secondary w-100 mt-3 fs-5">Quay lại danh sách sách</a>

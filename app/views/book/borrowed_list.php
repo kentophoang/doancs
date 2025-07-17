@@ -42,3 +42,32 @@
 </div>
 
 <?php include 'app/views/shares/footer.php'; ?>
+<style>
+    .card {
+        border-radius: 10px;
+        transition: transform 0.2s ease-in-out;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-title {
+        color: #007bff;
+    }
+    .badge-danger {
+        background-color: #dc3545;
+    }
+    .badge-success {
+        background-color: #28a745;
+    }
+    .badge-info {
+        background-color: #17a2b8;
+    }
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+</style>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thêm chủ đề / ngành nghề mới</title>
-    <link href="[https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css](https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css)" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #d3fcf7;
@@ -19,12 +19,12 @@
             color: #00796b;
         }
         .btn-primary {
-            background-color: #00796b;
-            border-color: #00796b;
+            background-color: #007bff; /* Changed to general primary color for consistency */
+            border-color: #007bff; /* Changed to general primary color for consistency */
         }
         .btn-secondary {
-            background-color: #0288d1;
-            border-color: #0288d1;
+            background-color: #6c757d; /* Changed to general secondary color for consistency */
+            border-color: #6c757d; /* Changed to general secondary color for consistency */
         }
         .btn-primary:hover, .btn-secondary:hover {
             opacity: 0.8;
@@ -66,9 +66,9 @@
 
 </div>
 
-<script src="[https://code.jquery.com/jquery-3.5.1.min.js](https://code.jquery.com/jquery-3.5.1.min.js)"></script>
-<script src="[https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js](https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js)"></script>
-<script src="[https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js](https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js)"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
 </html>

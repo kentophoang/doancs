@@ -1,14 +1,16 @@
 <?php
-require_once('app/config/database.php');
+require_once('app/config/database.php'); // Uses AppDatabase if needed, but the main Database class is in app/database/Database.php
 require_once('app/models/AccountModel.php');
+require_once('app/helpers/SessionHelper.php');
 
 class AccountController {
     private $accountModel;
     private $db;
 
-    public function __construct() { // Không nhận $db ở đây nếu bạn muốn khởi tạo Database bên trong
-        $this->db = (new Database())->getConnection();
+    public function __construct() {
+        $this->db = (new Database())->getConnection(); // Ensure it uses the main Database class
         $this->accountModel = new AccountModel($this->db);
+        SessionHelper::start();
     }
 
     public function register() {
@@ -57,10 +59,9 @@ class AccountController {
     }
 
     public function logout() {
- 
         unset($_SESSION['username']);
         unset($_SESSION['role']);
-        unset($_SESSION['user_id']); // Xóa user_id khi logout
+        unset($_SESSION['user_id']);
         header('Location: /');
         exit;
     }
@@ -72,12 +73,15 @@ class AccountController {
             $account = $this->accountModel->getAccountByUsername($username);
 
             if ($account && password_verify($password, $account->password)) {
-         
                 $_SESSION['username'] = $account->username;
                 $_SESSION['role'] = $account->role;
                 $_SESSION['user_id'] = $account->id;
 
-                header('Location: /Book');
+                if (SessionHelper::isAdmin()) {
+                    header('Location: /Admin/dashboard'); // Redirect admin to dashboard
+                } else {
+                    header('Location: /Book'); // Redirect regular users to book list
+                }
                 exit;
             } else {
                 $error = $account ? "Mật khẩu không đúng!" : "Không tìm thấy tài khoản!";
@@ -89,8 +93,7 @@ class AccountController {
     }
 
     public function profile() {
-  // Bắt đầu session nếu chưa bắt đầu
-        if (!isset($_SESSION['username']) || !isset($_SESSION['user_id'])) {
+        if (!SessionHelper::isLoggedIn()) {
             header('Location: /account/login');
             exit();
         }
@@ -104,8 +107,7 @@ class AccountController {
     }
 
     public function updateProfile() {
-  // Bắt đầu session nếu chưa bắt đầu
-        if (!isset($_SESSION['username']) || !isset($_SESSION['user_id'])) {
+        if (!SessionHelper::isLoggedIn()) {
             header('Location: /account/login');
             exit();
         }
@@ -125,5 +127,20 @@ class AccountController {
             }
         }
     }
+
+    // New method for managing accounts (admin view)
+    public function manage() {
+        SessionHelper::start();
+        if (!SessionHelper::isAdmin()) {
+            die("Bạn không có quyền quản lý thành viên."); // Access denied if not admin
+        }
+
+        $searchTerm = $_GET['search'] ?? null;
+        $sortBy = $_GET['sort'] ?? null;
+        $status = $_GET['status'] ?? null; // Assuming a 'status' filter might be added later
+
+        $accounts = $this->accountModel->getAllAccounts($searchTerm, $sortBy, $status);
+        
+        include 'app/views/account/manage.php';
+    }
 }
-?>

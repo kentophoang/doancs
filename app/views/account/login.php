@@ -9,7 +9,6 @@
                         <h2 class="text-center text-primary fw-bold mb-4">Đăng nhập</h2>
                         <p class="text-center text-muted">Vui lòng nhập thông tin tài khoản</p>
 
-                        <!-- Hiển thị thông báo lỗi nếu có -->
                         <?php if (isset($_SESSION['login_error'])): ?>
                             <div class="alert alert-danger text-center">
                                 <?php echo $_SESSION['login_error']; unset($_SESSION['login_error']); ?>
@@ -17,13 +16,11 @@
                         <?php endif; ?>
 
                         <form action="/account/checklogin" method="post">
-                            <!-- Username -->
                             <div class="mb-3">
                                 <label class="form-label">Tên đăng nhập</label>
                                 <input type="text" name="username" class="form-control rounded-3 shadow-sm" placeholder="Nhập tên đăng nhập" required>
                             </div>
 
-                            <!-- Password -->
                             <div class="mb-3">
                                 <label class="form-label">Mật khẩu</label>
                                 <input type="password" name="password" class="form-control rounded-3 shadow-sm" placeholder="Nhập mật khẩu" required>
@@ -33,7 +30,6 @@
                                 <a href="#" class="text-primary fw-bold">Quên mật khẩu?</a>
                             </div>
 
-                            <!-- Button -->
                             <div class="d-grid">
                                 <button class="btn btn-primary rounded-3 btn-lg shadow-sm" type="submit">Đăng nhập</button>
                             </div>
