@@ -1,5 +1,10 @@
 <?php
-// app/views/shares/public_layout.php
-// File này sẽ chỉ chứa header và footer.
-echo $main_content; // Chứa nội dung chính của view
+// Nhúng header.php
+include 'header.php';
+
+// Hiển thị nội dung chính của trang
+echo $main_content;
+
+// Nhúng footer.php
+include 'footer.php';
 ?>

@@ -1,6 +1,8 @@
 <?php
-// Tệp này sẽ bao gồm header và footer
-include 'app/views/shares/header.php';
+// Tệp này sẽ đảm nhận việc nhúng cả header và footer cho khu vực admin.
+
+// Nhúng header.php ở đây để nó xuất hiện trên các trang admin.
+include 'header.php';
 ?>
 
 <div class="container-fluid admin-layout-wrapper">
@@ -44,11 +46,11 @@ include 'app/views/shares/header.php';
                         <a class="nav-link" href="/Report/view"> <i class="fas fa-file-alt"></i> Báo cáo
                         </a>
                     </li>
-                     <li class="nav-item">
+                    <li class="nav-item">
                         <a class="nav-link" href="/Overdue/list"> <i class="fas fa-exclamation-circle"></i> Quá hạn
                         </a>
                     </li>
-                     <li class="nav-item">
+                    <li class="nav-item">
                         <a class="nav-link" href="/Upcoming/list"> <i class="fas fa-calendar-check"></i> Sắp ra mắt <span class="badge badge-danger ml-2">NEW</span>
                         </a>
                     </li>
@@ -59,7 +61,6 @@ include 'app/views/shares/header.php';
                 </ul>
             </div>
         </nav>
-
         <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
             <?php echo $main_content; ?>
         </main>
@@ -67,39 +68,40 @@ include 'app/views/shares/header.php';
 </div>
 
 <?php
-// Footer được bao gồm sau khi nội dung chính được hiển thị
-include 'app/views/shares/footer.php';
+// Nhúng footer.php ở đây để nó xuất hiện trên các trang admin.
+include 'footer.php';
 ?>
 
 <style>
+    /* CSS tuỳ chỉnh */
     body {
         background-color: #f8f9fc;
         font-family: 'Arial', sans-serif;
     }
     .admin-layout-wrapper {
-        padding-top: 56px; /* Offset for the fixed header height */
+        padding-top: 56px;
         display: flex;
-        min-height: calc(100vh - 56px); /* Adjust to fill remaining viewport height */
-        box-sizing: border-box; /* Include padding in element's total width and height */
+        min-height: calc(100vh - 56px);
+        box-sizing: border-box;
     }
     .row {
         width: 100%;
         margin: 0;
-        flex-wrap: nowrap; /* Prevent wrapping columns on smaller screens if sidebar is fixed */
+        flex-wrap: nowrap;
     }
     .sidebar {
-        height: calc(100vh - 56px); /* Adjusted for fixed header height */
-        background-color: #2c3e50 !important; /* Darker blue-gray from screenshot */
+        height: calc(100vh - 56px);
+        background-color: #2c3e50 !important;
         color: white;
         padding-top: 20px;
         position: fixed;
-        top: 56px; /* Position below the fixed header */
+        top: 56px;
         bottom: 0;
         left: 0;
         z-index: 1000;
         padding-right: 0;
         padding-left: 0;
-        overflow-y: auto; /* Enable scrolling for long sidebars */
+        overflow-y: auto;
     }
     .sidebar .nav-item {
         width: 100%;
@@ -123,8 +125,8 @@ include 'app/views/shares/footer.php';
     }
     main {
         padding-top: 20px;
-        margin-left: calc(16.666667% + 15px); /* Offset for sidebar width (col-md-2) + some margin */
-        width: calc(100% - 16.666667% - 15px); /* Adjust main content width */
+        margin-left: calc(16.666667% + 15px);
+        width: calc(100% - 16.666667% - 15px);
     }
     /* General Admin Card Styles */
     .card {
@@ -150,14 +152,12 @@ include 'app/views/shares/footer.php';
     .text-blue { color: #3498db !important; }
     .text-dark-blue { color: #2c3e50 !important; }
 
-
     .border-left-primary { border-left-color: #4e73df !important; }
     .border-left-success { border-left-color: #1cc88a !important; }
     .border-left-info { border-left-color: #36b9cc !important; }
     .border-left-warning { border-left-color: #f6c23e !important; }
     .border-left-danger { border-left-color: #e74a3b !important; }
     .border-left-blue { border-left-color: #3498db !important; }
-
 
     .h5.mb-0 {
         font-size: 1.25rem;
