@@ -1,5 +1,3 @@
-<?php include 'app/views/shares/header.php'; ?>
-
 <section class="vh-100 d-flex align-items-center justify-content-center bg-primary-light">
     <div class="container">
         <div class="row justify-content-center">
@@ -67,8 +65,6 @@
         </div>
     </div>
 </section>
-
-<?php include 'app/views/shares/footer.php'; ?>
 
 <style>
     .bg-primary-light {

@@ -1,207 +1,191 @@
 <?php
-// Tệp này sẽ đảm nhận việc nhúng cả header và footer cho khu vực admin.
+// Khởi tạo session và kiểm tra quyền admin
+require_once 'app/helpers/SessionHelper.php';
+SessionHelper::start();
 
-// Nhúng header.php ở đây để nó xuất hiện trên các trang admin.
+if (!SessionHelper::isAdmin()) {
+    header('Location: /account/login');
+    exit();
+}
+
+// Nhúng header chung (đã được thêm nút bấm)
 include 'header.php';
+
+// Xác định trang hiện tại để làm nổi bật link trên sidebar
+$request_uri = $_SERVER['REQUEST_URI'];
+$current_page = '';
+if (strpos($request_uri, '/Admin/dashboard') !== false) $current_page = 'dashboard';
+elseif (strpos($request_uri, '/Book') !== false) $current_page = 'book';
+elseif (strpos($request_uri, '/Subject') !== false) $current_page = 'subject';
+elseif (strpos($request_uri, '/Account/manage') !== false) $current_page = 'account';
+elseif (strpos($request_uri, '/Loan/manage') !== false) $current_page = 'loan';
+elseif (strpos($request_uri, '/Reservation/manage') !== false) $current_page = 'reservation';
+elseif (strpos($request_uri, '/Overdue/list') !== false) $current_page = 'overdue';
 ?>
 
-<div class="container-fluid admin-layout-wrapper">
-    <div class="row">
-        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark-sidebar sidebar collapse">
-            <div class="position-sticky pt-3">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link <?= (strpos($_SERVER['REQUEST_URI'], '/Admin/dashboard') !== false || $_SERVER['REQUEST_URI'] === '/Admin') ? 'active' : '' ?>" aria-current="page" href="/Admin/dashboard">
-                            <i class="fas fa-home"></i> Bảng điều khiển
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= (strpos($_SERVER['REQUEST_URI'], '/Book') !== false && strpos($_SERVER['REQUEST_URI'], '/Book/myBorrowedBooks') === false && strpos($_SERVER['REQUEST_URI'], '/Book/add') === false && strpos($_SERVER['REQUEST_URI'], '/Book/edit') === false) ? 'active' : '' ?>" href="/Book/">
-                            <i class="fas fa-book"></i> Quản lý sách
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= (strpos($_SERVER['REQUEST_URI'], '/Subject') !== false) ? 'active' : '' ?>" href="/Subject/index">
-                            <i class="fas fa-tags"></i> Quản lý chủ đề
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= (strpos($_SERVER['REQUEST_URI'], '/Account/manage') !== false) ? 'active' : '' ?>" href="/Account/manage">
-                            <i class="fas fa-users"></i> Quản lý thành viên
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Loan/manage"> <i class="fas fa-history"></i> Lưu hành sách
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Reservation/manage"> <i class="fas fa-calendar-alt"></i> Đặt trước
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Analytics/view"> <i class="fas fa-chart-line"></i> Phân tích
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Report/view"> <i class="fas fa-file-alt"></i> Báo cáo
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Overdue/list"> <i class="fas fa-exclamation-circle"></i> Quá hạn
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Upcoming/list"> <i class="fas fa-calendar-check"></i> Sắp ra mắt <span class="badge badge-danger ml-2">NEW</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Settings/edit"> <i class="fas fa-cog"></i> Cài đặt
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-        <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-            <?php echo $main_content; ?>
-        </main>
-    </div>
+<!-- Wrapper chính cho bố cục admin -->
+<div id="admin-wrapper">
+    <!-- Thanh bên (Sidebar) -->
+    <nav id="sidebar" class="bg-dark-sidebar">
+        <div class="position-sticky pt-3">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link <?= ($current_page === 'dashboard') ? 'active' : '' ?>" href="/Admin/dashboard">
+                        <i class="fas fa-home fa-fw"></i><span>Bảng điều khiển</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= ($current_page === 'book') ? 'active' : '' ?>" href="/Book/">
+                        <i class="fas fa-book fa-fw"></i><span>Quản lý sách</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= ($current_page === 'subject') ? 'active' : '' ?>" href="/Subject/index">
+                        <i class="fas fa-tags fa-fw"></i><span>Quản lý chủ đề</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= ($current_page === 'account') ? 'active' : '' ?>" href="/Account/manage">
+                        <i class="fas fa-users fa-fw"></i><span>Quản lý thành viên</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= ($current_page === 'loan') ? 'active' : '' ?>" href="/Loan/manage">
+                        <i class="fas fa-history fa-fw"></i><span>Lưu hành sách</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= ($current_page === 'reservation') ? 'active' : '' ?>" href="/Reservation/manage">
+                        <i class="fas fa-calendar-alt fa-fw"></i><span>Đặt trước</span>
+                    </a>
+                </li>
+                 <li class="nav-item">
+                    <a class="nav-link <?= ($current_page === 'overdue') ? 'active' : '' ?>" href="/Overdue/list">
+                        <i class="fas fa-exclamation-circle fa-fw"></i><span>Quá hạn</span>
+                    </a>
+                </li>
+                <!-- Thêm các mục khác nếu cần -->
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Khu vực nội dung chính -->
+    <main id="main-content">
+        <div class="container-fluid p-4">
+            <?php 
+                // Hiển thị các thông báo (nếu có)
+                if (isset($_SESSION['success_message'])) {
+                    echo '<div class="alert alert-success" role="alert">' . $_SESSION['success_message'] . '</div>';
+                    unset($_SESSION['success_message']);
+                }
+                if (isset($_SESSION['error_message'])) {
+                    echo '<div class="alert alert-danger" role="alert">' . $_SESSION['error_message'] . '</div>';
+                    unset($_SESSION['error_message']);
+                }
+            
+                // In nội dung chính của trang
+                echo $main_content ?? ''; 
+            ?>
+        </div>
+    </main>
 </div>
 
 <?php
-// Nhúng footer.php ở đây để nó xuất hiện trên các trang admin.
+// Nhúng footer chung
 include 'footer.php';
 ?>
 
+<!-- CSS và JavaScript cho thanh bên có thể thu gọn -->
 <style>
-    /* CSS tuỳ chỉnh */
     body {
-        background-color: #f8f9fc;
-        font-family: 'Arial', sans-serif;
+        overflow-x: hidden; /* Ngăn thanh cuộn ngang khi chuyển đổi */
     }
-    .admin-layout-wrapper {
-        padding-top: 56px;
+
+    #admin-wrapper {
         display: flex;
-        min-height: calc(100vh - 56px);
-        box-sizing: border-box;
-    }
-    .row {
         width: 100%;
-        margin: 0;
-        flex-wrap: nowrap;
+        min-height: calc(100vh - 56px); /* Chiều cao viewport trừ đi navbar */
     }
-    .sidebar {
-        height: calc(100vh - 56px);
-        background-color: #2c3e50 !important;
+
+    #sidebar {
+        width: 250px;
+        min-width: 250px;
+        background-color: #2c3e50;
         color: white;
-        padding-top: 20px;
-        position: fixed;
-        top: 56px;
-        bottom: 0;
-        left: 0;
-        z-index: 1000;
-        padding-right: 0;
-        padding-left: 0;
-        overflow-y: auto;
+        transition: all 0.3s ease-in-out;
     }
-    .sidebar .nav-item {
-        width: 100%;
-    }
-    .sidebar .nav-link {
-        color: #ecf0f1 !important;
-        padding: 10px 15px;
+
+    #sidebar .nav-link {
+        color: #ecf0f1;
+        padding: 12px 20px;
         transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        border-radius: 0;
+        white-space: nowrap; /* Ngăn chữ xuống dòng */
     }
-    .sidebar .nav-link:hover, .sidebar .nav-link.active {
-        color: white !important;
-        background-color: #3498db;
-    }
-    .sidebar .nav-link i {
-        margin-right: 10px;
-        width: 20px;
+
+    #sidebar .nav-link i {
+        margin-right: 15px;
+        width: 24px; /* Đảm bảo icon thẳng hàng */
         text-align: center;
+        font-size: 1.1rem;
     }
-    main {
-        padding-top: 20px;
-        margin-left: calc(16.666667% + 15px);
-        width: calc(100% - 16.666667% - 15px);
-    }
-    /* General Admin Card Styles */
-    .card {
-        border-left: .25rem solid !important;
-        border-radius: 0.35rem;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
-    }
-    .card-body {
-        padding: 1.25rem;
-    }
-    .text-xs {
-        font-size: 0.7rem;
-    }
-    .font-weight-bold {
-        font-weight: 700 !important;
-    }
-    /* Custom colors to match screenshot */
-    .text-primary { color: #4e73df !important; }
-    .text-success { color: #1cc88a !important; }
-    .text-info { color: #36b9cc !important; }
-    .text-warning { color: #f6c23e !important; }
-    .text-danger { color: #e74a3b !important; }
-    .text-blue { color: #3498db !important; }
-    .text-dark-blue { color: #2c3e50 !important; }
 
-    .border-left-primary { border-left-color: #4e73df !important; }
-    .border-left-success { border-left-color: #1cc88a !important; }
-    .border-left-info { border-left-color: #36b9cc !important; }
-    .border-left-warning { border-left-color: #f6c23e !important; }
-    .border-left-danger { border-left-color: #e74a3b !important; }
-    .border-left-blue { border-left-color: #3498db !important; }
-
-    .h5.mb-0 {
-        font-size: 1.25rem;
-    }
-    .fa-2x {
-        font-size: 2em;
-    }
-    .text-gray-300 {
-        color: #dddfeb !important;
-    }
-    .list-group-item {
-        border: 1px solid rgba(0,0,0,.125);
-        margin-bottom: -1px;
-        transition: background-color 0.2s ease;
-    }
-    .list-group-item:hover {
-        background-color: #f0f2f5;
-    }
-    .list-group-item:first-child {
-        border-top-left-radius: .25rem;
-        border-top-right-radius: .25rem;
-    }
-    .list-group-item:last-child {
-        margin-bottom: 0;
-        border-bottom-right-radius: .25rem;
-        border-bottom-left-radius: .25rem;
-    }
-    .card-header {
-        background-color: #f8f9fc;
-        border-bottom: 1px solid #e3e6f0;
-    }
-    .media img {
-        border: 1px solid #eee;
-    }
-    .btn-primary {
-        background-color: #4e73df;
-        border-color: #4e73df;
-    }
-    .btn-primary:hover {
-        background-color: #2e59d9;
-        border-color: #2e59d9;
-    }
-    .badge-danger {
-        background-color: #e74a3b;
+    #sidebar .nav-link:hover, #sidebar .nav-link.active {
+        background-color: #3498db;
         color: white;
     }
+
+    #main-content {
+        flex-grow: 1;
+        width: calc(100% - 250px);
+        background-color: #f8f9fc;
+        overflow-y: auto;
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* --- Trạng thái khi thu gọn --- */
+    #admin-wrapper.sidebar-toggled #sidebar {
+        width: 90px;
+        min-width: 90px;
+    }
+
+    #admin-wrapper.sidebar-toggled #sidebar .nav-link span {
+        display: none; /* Ẩn chữ */
+    }
+
+    #admin-wrapper.sidebar-toggled #sidebar .nav-link {
+        justify-content: center;
+    }
+    
+    #admin-wrapper.sidebar-toggled #sidebar .nav-link i {
+        margin-right: 0;
+        font-size: 1.3rem;
+    }
+
+    #admin-wrapper.sidebar-toggled #main-content {
+        width: calc(100% - 90px);
+    }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const adminWrapper = document.getElementById('admin-wrapper');
+
+    // Kiểm tra trạng thái đã lưu trong localStorage khi tải trang
+    if (localStorage.getItem('sidebarToggled') === 'true') {
+        adminWrapper.classList.add('sidebar-toggled');
+    }
+
+    if (sidebarToggle && adminWrapper) {
+        sidebarToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Thêm/xóa class để kích hoạt CSS
+            adminWrapper.classList.toggle('sidebar-toggled');
+            // Lưu trạng thái vào localStorage
+            localStorage.setItem('sidebarToggled', adminWrapper.classList.contains('sidebar-toggled'));
+        });
+    }
+});
+</script>

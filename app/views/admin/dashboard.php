@@ -1,172 +1,226 @@
-<?php 
-ob_start(); // Start output buffering
-?>
+<!-- Thêm CDN của Chart.js vào đầu file hoặc trong header.php -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Bảng điều khiển LIBSMART</h1>
-            </div>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2">Bảng điều khiển</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="/Book/add" class="btn btn-sm btn-primary me-2">
+            <i class="fas fa-plus-circle me-1"></i>
+            Thêm sách mới
+        </a>
+        <a href="/Report/view" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-file-download me-1"></i>
+            Xuất báo cáo
+        </a>
+    </div>
+</div>
 
-            <p class="mb-4 text-muted">Chào mừng trở lại! Đây là tình hình hoạt động của thư viện thông minh hôm nay.</p>
-
-            <div class="row">
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-primary shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng số sách</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><?= htmlspecialchars($totalBooks) ?></div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-book fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
+<!-- 4 Thẻ số liệu quan trọng -->
+<div class="row">
+    <!-- Card 1: Tổng số sách (ĐÃ KHÔI PHỤC) -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card h-100 border-start border-primary border-4 shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">Tổng số sách</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800"><?= htmlspecialchars($totalBooks ?? 0) ?></div>
                     </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-success shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Thành viên hoạt động</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><?= htmlspecialchars($activeMembers) ?></div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-users fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-info shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Sách đang lưu hành</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><?= htmlspecialchars($availableBooks) ?></div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-exchange-alt fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-warning shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Sách quá hạn</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><?= htmlspecialchars($overdueBooks) ?></div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="col-auto">
+                        <i class="fas fa-book-open fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="row">
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-danger shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Tổng phí phạt</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><?= htmlspecialchars($totalFines) ?></div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Card 2: Thành viên -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card h-100 border-start border-success border-4 shadow-sm">
+            <div class="card-body">
+                 <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-success text-uppercase mb-1">Thành viên</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800"><?= htmlspecialchars($activeMembers ?? 0) ?></div>
                     </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-blue shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-blue text-uppercase mb-1">Tổng trưởng thành</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><?= htmlspecialchars($growthRate) ?></div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-chart-line fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="row">
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-dark-blue">Hoạt động gần đây</h6>
-                            <a href="#" class="text-decoration-none text-info">Xem tất cả</a>
-                        </div>
-                        <div class="card-body">
-                            <div class="list-group">
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-arrow-circle-right text-success mr-2"></i> Nguyễn Văn An mượn "Tổ thầy hoa vàng trên cỏ xanh"
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-arrow-circle-left text-info mr-2"></i> Lê Minh Châu trả "Cách mạng công nghiệp 4.0"
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-user-plus text-primary mr-2"></i> Thành viên mới đăng ký: Phạm Thị Dung
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <i class="fas fa-exclamation-circle text-warning mr-2"></i> Nhắc nhở quá hạn gửi đến Trần Thị Bình
-                                </a>
-                            </div>
-                        </div>
+    <!-- Card 3: Đang được mượn -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card h-100 border-start border-info border-4 shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-info text-uppercase mb-1">Đang được mượn</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800"><?= htmlspecialchars($loansCount ?? 0) ?></div>
                     </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-dark-blue">Sách phổ biến</h6>
-                            <a href="#" class="text-decoration-none text-info">Xem tất cả</a>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                <?php if (!empty($popularBooks)): ?>
-                                    <?php foreach ($popularBooks as $book): ?>
-                                        <li class="media mb-3">
-                                            <?php if ($book->image): ?>
-                                                <img src="/<?= htmlspecialchars($book->image) ?>" class="mr-3 rounded" alt="Book Cover" style="width: 60px; height: 90px; object-fit: cover;">
-                                            <?php else: ?>
-                                                <img src="/uploads/default-book.jpg" class="mr-3 rounded" alt="Default Cover" style="width: 60px; height: 90px; object-fit: cover;">
-                                            <?php endif; ?>
-                                            <div class="media-body">
-                                                <h5 class="mt-0 mb-1"><?= htmlspecialchars($book->name) ?></h5>
-                                                <p class="text-muted mb-0">Tác giả: <?= htmlspecialchars($book->author) ?></p>
-                                                <p class="text-muted mb-0">Chủ đề: <?= htmlspecialchars($book->subject_name) ?></p>
-                                            </div>
-                                        </li>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <p class="text-center text-muted">Chưa có sách phổ biến nào.</p>
-                                <?php endif; ?>
-                            </ul>
-                        </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exchange-alt fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-<?php 
-$main_content = ob_get_clean(); // Get content and clear buffer
-include 'app/views/shares/admin_layout.php'; // Include the new layout
-?>
+    <!-- Card 4: Sách quá hạn -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card h-100 border-start border-danger border-4 shadow-sm">
+            <div class="card-body">
+                 <div class="row align-items-center">
+                    <div class="col">
+                        <div class="text-xs fw-bold text-danger text-uppercase mb-1">Sách quá hạn</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800"><?= htmlspecialchars($overdueCount ?? 0) ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Khu vực Biểu đồ và Sách phổ biến -->
+<div class="row">
+    <!-- Cột chính (Biểu đồ và Hoạt động gần đây) -->
+    <div class="col-lg-8">
+        <!-- Biểu đồ -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 fw-bold text-primary">Thống kê Mượn/Trả (7 ngày qua)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-area" style="height: 320px;">
+                    <canvas id="loanReturnChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hoạt động gần đây -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 fw-bold text-primary">Hoạt động gần đây</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Thành viên</th>
+                            <th>Sách</th>
+                            <th class="text-center">Hành động</th>
+                            <th>Thời gian</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($recentActivities)): ?>
+                            <?php foreach($recentActivities as $activity): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($activity->member_name) ?></td>
+                                    <td><?= htmlspecialchars($activity->book_title) ?></td>
+                                    <td class="text-center">
+                                        <?php if($activity->action === 'loan'): ?>
+                                            <span class="badge bg-primary">Mượn</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-success">Trả</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?= date('d/m/Y', strtotime($activity->timestamp)) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="4" class="text-center text-muted p-4">Không có hoạt động nào gần đây.</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột phụ (Sách phổ biến) -->
+    <div class="col-lg-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 fw-bold text-primary">Sách được mượn nhiều nhất</h6>
+            </div>
+            <div class="card-body">
+                <?php if (!empty($popularBooks)): ?>
+                    <ul class="list-group list-group-flush">
+                        <?php foreach($popularBooks as $book): ?>
+                            <li class="list-group-item d-flex align-items-center px-0">
+                                <img src="/<?= htmlspecialchars($book->image ?? 'uploads/default-book.jpg') ?>" alt="" class="rounded me-3" style="width: 40px; height: 60px; object-fit: cover;">
+                                <div class="flex-grow-1">
+                                    <a href="/Book/show/<?= $book->id ?>" class="text-decoration-none text-dark fw-bold d-block"><?= htmlspecialchars($book->name) ?></a>
+                                    <small class="text-muted">Lượt mượn: <?= $book->loan_count ?></small>
+                                </div>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <div class="text-center text-muted p-4">Chưa có dữ liệu về sách phổ biến.</div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script để vẽ biểu đồ -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Lấy dữ liệu từ PHP
+    const chartData = JSON.parse('<?= $chartDataJson ?? '{}' ?>');
+    
+    // Cấu hình biểu đồ
+    const ctx = document.getElementById('loanReturnChart').getContext('2d');
+    if (window.myLineChart) {
+        window.myLineChart.destroy();
+    }
+    window.myLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels || [],
+            datasets: [{
+                label: 'Sách mượn',
+                data: chartData.loans || [],
+                borderColor: 'rgba(78, 115, 223, 1)',
+                backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                fill: true,
+                tension: 0.3
+            }, {
+                label: 'Sách trả',
+                data: chartData.returns || [],
+                borderColor: 'rgba(28, 200, 138, 1)',
+                backgroundColor: 'rgba(28, 200, 138, 0.05)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            }
+        }
+    });
+});
+</script>

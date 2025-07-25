@@ -1,0 +1,64 @@
+/* public/css/book-management.css */
+
+.page-title {
+    color: #34495e;
+    font-weight: bold;
+}
+
+.btn-add-new {
+    background-color: #2ecc71;
+    border-color: #2ecc71;
+    font-weight: bold;
+}
+
+.btn-add-new:hover {
+    background-color: #27ae60;
+    border-color: #27ae60;
+}
+
+.book-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.book-card .book-img {
+    height: 300px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.book-card .card-body {
+    padding: 1rem;
+}
+
+.book-card .card-title {
+    font-size: 1rem;
+    font-weight: bold;
+    /* Kỹ thuật cắt chữ nếu quá dài */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-card .card-title a {
+    color: #333;
+}
+
+.book-card .card-title a:hover {
+    color: #007bff;
+}
+
+/* Nút bấm của Admin nằm đè lên card */
+.book-card .admin-actions {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-top: 1px solid #eee;
+    text-align: center;
+    padding: 0.5rem;
+}

@@ -1,7 +1,3 @@
-<?php
-// app/views/loan/manage.php
-ob_start(); // Start output buffering
-?>
 <div class="container-fluid admin-content-container py-3">
     <h1 class="h2 page-title">Quản lý Lưu hành Sách</h1>
     <p class="text-muted">Đây là trang quản lý các giao dịch mượn/trả sách.</p>
@@ -101,7 +97,3 @@ ob_start(); // Start output buffering
         </div>
     </div>
 </div>
-<?php 
-$main_content = ob_get_clean();
-include 'app/views/shares/admin_layout.php';
-?>

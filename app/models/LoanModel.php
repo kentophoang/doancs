@@ -1,11 +1,13 @@
 <?php
 class LoanModel {
     private $conn;
-    private $table_name = "loans"; // Tên bảng là 'loans' hoặc 'borrow_records'
+    private $table_name = "loans";
 
     public function __construct($db) {
         $this->conn = $db;
     }
+
+    // --- CÁC PHƯƠNG THỨC CRUD CƠ BẢN ---
 
     public function createLoan($book_id, $user_id, $borrow_date, $due_date) {
         $query = "INSERT INTO " . $this->table_name . " (book_id, user_id, borrow_date, due_date, status) VALUES (:book_id, :user_id, :borrow_date, :due_date, 'borrowed')";
@@ -31,13 +33,17 @@ class LoanModel {
     }
 
     public function getLoanById($loan_id) {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE id = :loan_id";
+        $query = "SELECT l.*, b.name as book_name, a.fullname as borrower_fullname 
+                  FROM " . $this->table_name . " l
+                  JOIN books b ON l.book_id = b.id
+                  JOIN accounts a ON l.user_id = a.id
+                  WHERE l.id = :loan_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':loan_id', $loan_id, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
-
+    
     public function getAllLoans($searchTerm = null, $status = null, $userId = null) {
         $query = "SELECT l.*, b.name as book_name, b.ISBN, a.username as borrower_username, a.fullname as borrower_fullname
                   FROM " . $this->table_name . " l
@@ -57,7 +63,7 @@ class LoanModel {
             $query .= " AND l.status = ?";
             $params[] = $status;
         }
-        if ($userId) { // Dùng cho MyBorrowedBooks của người dùng
+        if ($userId) {
             $query .= " AND l.user_id = ?";
             $params[] = $userId;
         }
@@ -68,6 +74,89 @@ class LoanModel {
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
+
+    // --- CÁC PHƯƠNG THỨC THỐNG KÊ CHO DASHBOARD ---
+
+    public function countCurrentLoans() {
+        $stmt = $this->conn->prepare("SELECT COUNT(id) as total FROM " . $this->table_name . " WHERE return_date IS NULL");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_OBJ);
+        return $result ? (int)$result->total : 0;
+    }
+
+    public function countOverdueBooks() {
+        $stmt = $this->conn->prepare("SELECT COUNT(id) as total FROM " . $this->table_name . " WHERE return_date IS NULL AND due_date < CURDATE()");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_OBJ);
+        return $result ? (int)$result->total : 0;
+    }
+
+    public function getLoanStatsForChart($days = 7) {
+        $labels = [];
+        $loan_data = array_fill(0, $days, 0);
+        $return_data = array_fill(0, $days, 0);
+
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $labels[] = date('d/m', strtotime("-$i days"));
+        }
+
+        $startDate = date('Y-m-d', strtotime('-' . ($days - 1) . ' days'));
+
+        $loan_query = "SELECT DATE(borrow_date) as day, COUNT(id) as total 
+                       FROM " . $this->table_name . " 
+                       WHERE borrow_date >= :startDate 
+                       GROUP BY day";
+        $loan_stmt = $this->conn->prepare($loan_query);
+        $loan_stmt->bindParam(':startDate', $startDate);
+        $loan_stmt->execute();
+        $loan_results = $loan_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        $return_query = "SELECT DATE(return_date) as day, COUNT(id) as total 
+                         FROM " . $this->table_name . " 
+                         WHERE return_date >= :startDate 
+                         GROUP BY day";
+        $return_stmt = $this->conn->prepare($return_query);
+        $return_stmt->bindParam(':startDate', $startDate);
+        $return_stmt->execute();
+        $return_results = $return_stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        foreach ($labels as $index => $label) {
+            $date_key = date('Y-m-d', strtotime(str_replace('/', '-', $label) . '-' . date('Y')));
+            if (isset($loan_results[$date_key])) {
+                $loan_data[$index] = (int)$loan_results[$date_key];
+            }
+            if (isset($return_results[$date_key])) {
+                $return_data[$index] = (int)$return_results[$date_key];
+            }
+        }
+
+        return [
+            'labels' => $labels,
+            'loans' => $loan_data,
+            'returns' => $return_data
+        ];
+    }
+
+    public function getRecentActivities($limit = 5) {
+        $query = "(SELECT a.fullname as member_name, b.name as book_title, 'loan' as action, l.borrow_date as timestamp
+                  FROM " . $this->table_name . " l
+                  JOIN accounts a ON l.user_id = a.id
+                  JOIN books b ON l.book_id = b.id)
+                  UNION ALL
+                  (SELECT a.fullname as member_name, b.name as book_title, 'return' as action, l.return_date as timestamp
+                  FROM " . $this->table_name . " l
+                  JOIN accounts a ON l.user_id = a.id
+                  JOIN books b ON l.book_id = b.id
+                  WHERE l.return_date IS NOT NULL)
+                  ORDER BY timestamp DESC
+                  LIMIT :limit";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    // --- CÁC PHƯƠNG THỨC XỬ LÝ SÁCH QUÁ HẠN ---
 
     public function getOverdueLoans() {
         $query = "SELECT l.*, b.name as book_name, b.ISBN, a.username as borrower_username, a.fullname as borrower_fullname
@@ -81,37 +170,14 @@ class LoanModel {
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
-    // Phương thức để cập nhật trạng thái quá hạn
-    public function updateOverdueStatus($loan_id) {
-        $query = "UPDATE " . $this->table_name . " SET status = 'overdue' WHERE id = :loan_id AND due_date < CURDATE() AND status = 'borrowed'";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':loan_id', $loan_id, PDO::PARAM_INT);
-        return $stmt->execute();
-    }
-    
-    // Phương thức MỚI để cập nhật trạng thái quá hạn cho TẤT CẢ các khoản vay
+    /**
+     * SỬA LỖI: Thêm lại phương thức bị thiếu.
+     * Cập nhật trạng thái của tất cả sách đang mượn đã quá hạn thành 'overdue'.
+     */
     public function updateOverdueStatusAll()
     {
         $query = "UPDATE " . $this->table_name . " SET status = 'overdue' WHERE due_date < CURDATE() AND status = 'borrowed'";
         $stmt = $this->conn->prepare($query);
         return $stmt->execute();
     }
-
-
-    // Phương thức để lấy số lượng sách đang lưu hành
-    public function countBorrowedBooks() {
-        $query = "SELECT COUNT(*) FROM " . $this->table_name . " WHERE status = 'borrowed'";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchColumn();
-    }
-
-    // Phương thức để lấy số lượng sách quá hạn
-    public function countOverdueBooks() {
-        $query = "SELECT COUNT(*) FROM " . $this->table_name . " WHERE due_date < CURDATE() AND status = 'borrowed'";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchColumn();
-    }
 }
-?>

@@ -85,6 +85,10 @@ class BookController
 
     public function add()
     {
+        if (!SessionHelper::isAdmin()) {
+            http_response_code(403);
+            die("Bạn không có quyền truy cập trang này.");
+        }
         SessionHelper::start(); 
         if (!SessionHelper::isAdmin()) {
             header('Location: /account/login');
@@ -104,6 +108,10 @@ class BookController
 
     public function save()
     {
+        if (!SessionHelper::isAdmin()) {
+            http_response_code(403);
+            die("Bạn không có quyền truy cập trang này.");
+        }
         SessionHelper::start(); 
         if (!SessionHelper::isAdmin()) {
             header('Location: /account/login');
@@ -154,6 +162,10 @@ class BookController
 
     public function edit($id)
     {
+        if (!SessionHelper::isAdmin()) {
+            http_response_code(403);
+            die("Bạn không có quyền truy cập trang này.");
+        }
         SessionHelper::start(); 
         if (!SessionHelper::isAdmin()) {
             header('Location: /account/login');
@@ -179,6 +191,10 @@ class BookController
 
     public function update()
     {
+        if (!SessionHelper::isAdmin()) {
+            http_response_code(403);
+            die("Bạn không có quyền truy cập trang này.");
+        }
         SessionHelper::start(); 
         if (!SessionHelper::isAdmin()) {
             header('Location: /account/login');
@@ -228,6 +244,10 @@ class BookController
 
     public function delete($id)
     {
+        if (!SessionHelper::isAdmin()) {
+            http_response_code(403);
+            die("Bạn không có quyền truy cập trang này.");
+        }
         SessionHelper::start(); 
         if (!SessionHelper::isAdmin()) {
             header('Location: /account/login');
@@ -252,6 +272,10 @@ class BookController
 
     private function uploadFile($file)
     {
+        if (!SessionHelper::isAdmin()) {
+            http_response_code(403);
+            die("Bạn không có quyền truy cập trang này.");
+        }
         $target_dir = "uploads/";
         if (!is_dir($target_dir)) {
             mkdir($target_dir, 0777, true);

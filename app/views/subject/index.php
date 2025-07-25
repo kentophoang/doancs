@@ -1,8 +1,3 @@
-<?php
-// No longer including header/footer here, it's done by admin_layout.php
-ob_start(); // Start output buffering
-?>
-
 <div class="container-fluid admin-content-container py-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h2 page-title">Quản lý Chủ đề / Ngành nghề</h1>
@@ -71,10 +66,7 @@ ob_start(); // Start output buffering
     </div>
 </div>
 
-<?php 
-$main_content = ob_get_clean(); // Get content and clear buffer
-include 'app/views/shares/admin_layout.php'; // Include the new layout
-?>
+
 
 <style>
     /* Styling for Subject Index page within admin layout */

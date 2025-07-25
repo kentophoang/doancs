@@ -1,7 +1,3 @@
-<?php
-// app/views/overdue/list.php
-ob_start(); // Start output buffering
-?>
 <div class="container-fluid admin-content-container py-3">
     <h1 class="h2 page-title">Sách Quá hạn & Phí phạt</h1>
     <p class="text-muted">Theo dõi các cuốn sách đã quá hạn và phí phạt liên quan.</p>
@@ -54,7 +50,3 @@ ob_start(); // Start output buffering
         </div>
     </div>
 </div>
-<?php 
-$main_content = ob_get_clean();
-include 'app/views/shares/admin_layout.php';
-?>

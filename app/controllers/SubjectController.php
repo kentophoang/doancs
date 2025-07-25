@@ -11,14 +11,30 @@ class SubjectController
             die("Không thể kết nối đến cơ sở dữ liệu.");
         }
         $this->subjectModel = new SubjectModel($db);
-        SessionHelper::start(); // Ensure session is started for all SubjectController actions
-        if (!SessionHelper::isAdmin()) { // Restrict access for non-admins
-            die("Bạn không có quyền truy cập trang quản lý chủ đề/ngành nghề.");
+        SessionHelper::start();
+    }
+
+    public function publicList()
+    {
+        $subjects = $this->subjectModel->getSubjects();
+        $subjectsByParent = [];
+        foreach ($subjects as $sub) {
+            $parentId = $sub->parent_id ?? 0;
+            $subjectsByParent[$parentId][] = $sub;
         }
+
+        ob_start();
+        include 'app/views/subject/public_list.php';
+        $main_content = ob_get_clean();
+        include 'app/views/shares/public_layout.php';
     }
 
     public function index()
     {
+        if (!SessionHelper::isAdmin()) {
+            header('Location: /account/login');
+            exit();
+        }
         try {
             $subjects = $this->subjectModel->getSubjects();
             $subjectsByParent = [];
@@ -37,6 +53,10 @@ class SubjectController
     
     public function view($id)
     {
+        if (!SessionHelper::isAdmin()) {
+            header('Location: /account/login');
+            exit();
+        }
         try {
             $subject = $this->subjectModel->getSubjectById($id);
             if (!$subject) {
@@ -60,7 +80,11 @@ class SubjectController
 
     public function create()
     {
-        $parentSubjects = $this->subjectModel->getSubjects(); // Use getSubjects to get all for hierarchical display
+        if (!SessionHelper::isAdmin()) {
+            header('Location: /account/login');
+            exit();
+        }
+        $parentSubjects = $this->subjectModel->getSubjects();
         $subjectsByParent = [];
         foreach ($parentSubjects as $sub) {
             $parentId = $sub->parent_id ?? 0;
@@ -74,6 +98,10 @@ class SubjectController
 
     public function store()
     {
+        if (!SessionHelper::isAdmin()) {
+            header('Location: /account/login');
+            exit();
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name'] ?? '');
             $description = trim($_POST['description'] ?? '');
@@ -115,6 +143,10 @@ class SubjectController
 
     public function edit($id)
     {
+        if (!SessionHelper::isAdmin()) {
+            header('Location: /account/login');
+            exit();
+        }
         $subject = $this->subjectModel->getSubjectById($id);
         if (!$subject) {
             die("Chủ đề/Ngành nghề không tồn tại!");
@@ -133,6 +165,10 @@ class SubjectController
 
     public function update($id)
     {
+        if (!SessionHelper::isAdmin()) {
+            header('Location: /account/login');
+            exit();
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name'] ?? '');
             $description = trim($_POST['description'] ?? '');
@@ -176,6 +212,10 @@ class SubjectController
 
     public function delete($id)
     {
+        if (!SessionHelper::isAdmin()) {
+            header('Location: /account/login');
+            exit();
+        }
         try {
             $this->subjectModel->deleteSubject($id);
             header("Location: /Subject/index");
@@ -185,3 +225,4 @@ class SubjectController
         }
     }
 }
+?>
