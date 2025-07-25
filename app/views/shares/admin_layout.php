@@ -1,6 +1,6 @@
 <?php
-// This file does NOT include header.php or footer.php.
-// It assumes index.php has already rendered header.php and will render footer.php.
+// Tệp này sẽ bao gồm header và footer
+include 'app/views/shares/header.php';
 ?>
 
 <div class="container-fluid admin-layout-wrapper">
@@ -16,6 +16,11 @@
                     <li class="nav-item">
                         <a class="nav-link <?= (strpos($_SERVER['REQUEST_URI'], '/Book') !== false && strpos($_SERVER['REQUEST_URI'], '/Book/myBorrowedBooks') === false && strpos($_SERVER['REQUEST_URI'], '/Book/add') === false && strpos($_SERVER['REQUEST_URI'], '/Book/edit') === false) ? 'active' : '' ?>" href="/Book/">
                             <i class="fas fa-book"></i> Quản lý sách
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= (strpos($_SERVER['REQUEST_URI'], '/Subject') !== false) ? 'active' : '' ?>" href="/Subject/index">
+                            <i class="fas fa-tags"></i> Quản lý chủ đề
                         </a>
                     </li>
                     <li class="nav-item">
@@ -60,6 +65,11 @@
         </main>
     </div>
 </div>
+
+<?php
+// Footer được bao gồm sau khi nội dung chính được hiển thị
+include 'app/views/shares/footer.php';
+?>
 
 <style>
     body {

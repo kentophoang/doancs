@@ -1,4 +1,4 @@
-<?php include 'app/views/shares/header.php'; ?>
+
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">➕ Thêm sách mới</h2>
@@ -88,7 +88,7 @@
     </div>
 </div>
 
-<?php include 'app/views/shares/footer.php'; ?>
+
 
 <style>
     body {

@@ -1,7 +1,7 @@
 <?php
 class AccountModel {
     private $conn;
-    private $table_name = "account";
+    private $table_name = "accounts"; // Đã đổi tên bảng để khớp với SQL schema
 
     public function __construct($db) {
         $this->conn = $db;
@@ -15,7 +15,14 @@ class AccountModel {
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    // New method to get all accounts
+    public function getAccountById($id) { // Thêm phương thức này để lấy thông tin tài khoản bằng ID
+        $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id LIMIT 0,1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
     public function getAllAccounts($searchTerm = null, $sortBy = null, $status = null) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE 1=1";
         $params = [];
@@ -37,7 +44,7 @@ class AccountModel {
         } elseif ($sortBy == 'name_desc') {
             $query .= " ORDER BY fullname DESC";
         } else {
-            $query .= " ORDER BY username ASC"; // Changed default sort to username
+            $query .= " ORDER BY username ASC";
         }
 
         $stmt = $this->conn->prepare($query);
@@ -49,19 +56,19 @@ class AccountModel {
         if ($this->getAccountByUsername($username)) {
             return false;
         }
-        $query = "INSERT INTO " . $this->table_name . " (username, fullname, password, role, profession, industry) VALUES (:username, :fullname, :password, :role, :profession, :industry)"; // Added column names explicitly
+        $query = "INSERT INTO " . $this->table_name . " (username, fullname, password, role, profession, industry) VALUES (:username, :fullname, :password, :role, :profession, :industry)";
         $stmt = $this->conn->prepare($query);
 
         $username = htmlspecialchars(strip_tags($username));
         $fullName = htmlspecialchars(strip_tags($fullName));
-        $password = password_hash($password, PASSWORD_BCRYPT);
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT); // Sử dụng biến đã băm
         $role = htmlspecialchars(strip_tags($role));
         $profession = htmlspecialchars(strip_tags($profession));
         $industry = htmlspecialchars(strip_tags($industry));
 
         $stmt->bindParam(":username", $username);
         $stmt->bindParam(":fullname", $fullName);
-        $stmt->bindParam(":password", $password);
+        $stmt->bindParam(":password", $hashedPassword); // Bind mật khẩu đã băm
         $stmt->bindParam(":role", $role);
         $stmt->bindParam(":profession", $profession);
         $stmt->bindParam(":industry", $industry);
@@ -80,4 +87,20 @@ class AccountModel {
 
         return $stmt->execute();
     }
+
+    public function deleteAccount($id) { // Thêm phương thức xóa tài khoản
+        $query = "DELETE FROM " . $this->table_name . " WHERE id=:id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function updateAccountRole($id, $role) { // Thêm phương thức cập nhật vai trò
+        $query = "UPDATE " . $this->table_name . " SET role=:role WHERE id=:id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->bindParam(':role', htmlspecialchars(strip_tags($role)));
+        return $stmt->execute();
+    }
 }
+?>
