@@ -1,73 +1,72 @@
-<?php include 'app/views/shares/header.php'; ?>
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Sách đang mượn</h1>
+    </div>
 
-<div class="container mt-4">
-    <h2 class="text-center mb-4">📚 Sách bạn đã mượn</h2>
-
-    <?php if (!empty($borrowedBooks)): ?>
-        <div class="row">
-            <?php foreach ($borrowedBooks as $borrowedBook): ?>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title"><?= htmlspecialchars($borrowedBook->book_name) ?></h5>
-                            <p class="card-text"><strong>Tác giả:</strong> <?= htmlspecialchars($borrowedBook->author) ?></p>
-                            <p class="card-text"><strong>Ngày mượn:</strong> <?= htmlspecialchars($borrowedBook->borrow_date) ?></p>
-                            <p class="card-text"><strong>Ngày đến hạn:</strong> <?= htmlspecialchars($borrowedBook->due_date) ?></p>
-                            <p class="card-text"><strong>Trạng thái:</strong>
-                                <span class="badge <?= ($borrowedBook->status == 'overdue') ? 'badge-danger' : (($borrowedBook->status == 'returned') ? 'badge-success' : 'badge-info') ?>">
-                                    <?= htmlspecialchars($borrowedBook->status) ?>
-                                </span>
-                            </p>
-                            <?php if ($borrowedBook->status == 'borrowed'): ?>
-                                <a href="/Book/returnBook/<?= $borrowedBook->book_id ?>" class="btn btn-success btn-sm mt-2" onclick="return confirm('Bạn có chắc chắn muốn trả sách này?');">Trả sách</a>
-                            <?php endif; ?>
-                            <?php if ($borrowedBook->fine_amount > 0): ?>
-                                <p class="card-text text-danger mt-2"><strong>Phí trễ hạn:</strong> <?= number_format($borrowedBook->fine_amount, 0, ',', '.') ?> đ</p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Sách</th>
+                        <th scope="col">Ngày mượn</th>
+                        <th scope="col">Ngày hết hạn</th>
+                        <th scope="col" class="text-center">Trạng thái</th>
+                        <th scope="col" class="text-center">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($borrowedBooks)): ?>
+                        <?php foreach ($borrowedBooks as $loan): ?>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="/<?= htmlspecialchars($loan->image ?? 'uploads/default-book.jpg') ?>" class="img-fluid rounded me-3" style="width: 50px; height: 70px; object-fit: cover;">
+                                        <div>
+                                            <a href="/book/show/<?= $loan->book_id ?>" class="fw-bold text-dark text-decoration-none">
+                                                <?= htmlspecialchars($loan->book_name) ?>
+                                            </a>
+                                            <small class="d-block text-muted">
+                                                Tác giả: <?= htmlspecialchars($loan->author ?? 'Không rõ') ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><?= date('d/m/Y', strtotime($loan->borrow_date)) ?></td>
+                                <td><?= date('d/m/Y', strtotime($loan->due_date)) ?></td>
+                                <td class="text-center">
+                                    <?php
+                                        $is_overdue = strtotime($loan->due_date) < time() && $loan->status !== 'returned';
+                                        if ($loan->status === 'returned') {
+                                            echo '<span class="badge bg-secondary">Đã trả</span>';
+                                        } elseif ($is_overdue) {
+                                            echo '<span class="badge bg-danger">Quá hạn</span>';
+                                        } else {
+                                            echo '<span class="badge bg-primary">Đang mượn</span>';
+                                        }
+                                    ?>
+                                </td>
+                                <td class="text-center">
+                                    <?php if ($loan->status !== 'returned'): ?>
+                                        <a href="/book/returnBook/<?= $loan->id ?>" class="btn btn-sm btn-outline-success">
+                                             Trả sách
+                                        </a>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted p-5">
+                                <i class="fas fa-book-reader fa-3x mb-3"></i>
+                                <p class="mb-0">Bạn chưa mượn cuốn sách nào.</p>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-    <?php else: ?>
-        <div class="alert alert-info text-center">
-            Bạn chưa mượn cuốn sách nào.
-            <a href="/Book/" class="alert-link">Hãy khám phá thư viện!</a>
-        </div>
-    <?php endif; ?>
-
-    <div class="text-center mt-4">
-        <a href="/Book/" class="btn btn-primary">Quay lại danh sách sách</a>
     </div>
 </div>
-
-<?php include 'app/views/shares/footer.php'; ?>
-<style>
-    .card {
-        border-radius: 10px;
-        transition: transform 0.2s ease-in-out;
-    }
-    .card:hover {
-        transform: translateY(-5px);
-    }
-    .card-title {
-        color: #007bff;
-    }
-    .badge-danger {
-        background-color: #dc3545;
-    }
-    .badge-success {
-        background-color: #28a745;
-    }
-    .badge-info {
-        background-color: #17a2b8;
-    }
-    .btn-success {
-        background-color: #28a745;
-        border-color: #28a745;
-    }
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-    }
-</style>

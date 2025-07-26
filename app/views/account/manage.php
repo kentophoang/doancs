@@ -1,108 +1,132 @@
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h1 class="h2 page-title">Quản lý thành viên</h1>
-            <p class="text-muted mb-0">Quản lý thành viên và tài khoản của họ</p>
-        </div>
-        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-            <a href="/account/register" class="btn btn-success btn-add-new">
-                <i class="fas fa-plus-circle mr-2"></i> Thêm thành viên mới
-            </a>
-        <?php endif; ?>
-    </div>
+<?php
+require_once 'app/helpers/SessionHelper.php';
+?>
 
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <form method="GET" action="/Account/manage" class="form-row align-items-center mb-3">
-                <div class="col-md-3 mb-2 mb-md-0">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text search-icon-bg"><i class="fas fa-search text-muted"></i></span>
-                        </div>
-                        <input type="text" id="search" name="search" placeholder="Tìm kiếm thành viên..." class="form-control" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
-                    </div>
-                </div>
+<div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Quản lý Thành viên</h1>
+    <a href="/account/register" class="btn btn-primary">
+        <i class="fas fa-user-plus me-1"></i> Thêm thành viên mới
+    </a>
+</div>
 
-                <div class="col-md-2 mb-2 mb-md-0">
-                    <select id="status" name="status" class="form-control custom-select">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="active" <?= (isset($_GET['status']) && $_GET['status'] == 'active') ? 'selected' : '' ?>>Hoạt động</option>
-                        <option value="inactive" <?= (isset($_GET['status']) && $_GET['status'] == 'inactive') ? 'selected' : '' ?>>Không hoạt động</option>
-                        </select>
+<!-- Form tìm kiếm và lọc -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="/Account/manage" class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" id="search" name="search" placeholder="Tìm theo tên, username, hoặc email..." class="form-control" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
                 </div>
-
-                <div class="col-md-2 mb-2 mb-md-0">
-                    <select id="sort" name="sort" class="form-control custom-select">
-                        <option value="">Sắp xếp theo</option>
-                        <option value="name_asc" <?= (isset($_GET['sort']) && $_GET['sort'] == 'name_asc') ? 'selected' : '' ?>>Tên (A-Z)</option>
-                        <option value="name_desc" <?= (isset($_GET['sort']) && $_GET['sort'] == 'name_desc') ? 'selected' : '' ?>>Tên (Z-A)</option>
-                        </select>
-                </div>
-                
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary btn-block filter-btn">Lọc</button>
-                </div>
-                <div class="col-md-3 text-right">
-                    <button class="btn btn-outline-info btn-advanced-filter">
-                        <i class="fas fa-filter mr-1"></i> Bộ lọc nâng cao
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="row member-grid">
-        <?php if (!empty($accounts)): ?>
-            <?php foreach ($accounts as $account): ?>
-                <div class="col-md-4 mb-4">
-                    <div class="card member-card h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column align-items-center">
-                            <div class="member-avatar-container d-flex justify-content-center align-items-center mb-3">
-                                <div class="member-avatar rounded-circle d-flex justify-content-center align-items-center mr-3"
-                                    style="background-color: <?= '#'.substr(md5($account->id), 0, 6); ?>; color: white;">
-                                    <?= strtoupper(substr(htmlspecialchars($account->fullname), 0, 2)) ?>
-                                </div>
-                                <span class="member-status-badge badge badge-success">Hoạt động</span> </div>
-                            
-                            <h5 class="card-title text-dark font-weight-bold mb-1">
-                                <?= htmlspecialchars($account->fullname) ?> <small class="text-muted">#<?= htmlspecialchars($account->id) ?></small>
-                            </h5>
-                            <p class="card-text text-muted mb-1"><small><i class="fas fa-envelope mr-1"></i> <?= htmlspecialchars($account->username) ?>@email.com</small></p>
-                            <p class="card-text text-muted mb-3"><small><i class="fas fa-phone mr-1"></i> +84 901 234 567</small></p>
-                            
-                            <div class="d-flex justify-content-around w-100 mb-3 stat-section">
-                                <div class="text-center">
-                                    <h6 class="mb-0 text-primary">0</h6>
-                                    <small class="text-muted">Đang mượn</small>
-                                </div>
-                                <div class="text-center">
-                                    <h6 class="mb-0 text-danger">0</h6>
-                                    <small class="text-muted">Quá hạn</small>
-                                </div>
-                                <div class="text-center">
-                                    <h6 class="mb-0 text-warning">0 VND</h6>
-                                    <small class="text-muted">Phí phạt</small>
-                                </div>
-                            </div>
-                            
-                            <p class="card-text text-muted mb-3"><small>hoạt động hơn 1 năm trước</small></p> <div class="text-center mt-auto action-buttons">
-                                <a href="/account/view/<?= $account->id ?>" class="btn btn-info btn-sm action-btn">
-                                    <i class="fas fa-eye"></i> Xem
-                                </a>
-                                <a href="/account/edit/<?= $account->id ?>" class="btn btn-warning btn-sm action-btn">
-                                    <i class="fas fa-edit"></i> Sửa
-                                </a>
-                                <a href="/account/delete/<?= $account->id ?>" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Bạn có chắc chắn muốn xóa thành viên này?');">
-                                    <i class="fas fa-trash-alt"></i> Xóa
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="col-12">
-                <p class="text-center text-muted">Không tìm thấy thành viên nào theo tiêu chí tìm kiếm của bạn.</p>
             </div>
-        <?php endif; ?>
+            <div class="col-md-3">
+                <select id="status" name="status" class="form-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="verified" <?= (($_GET['status'] ?? '') == 'verified') ? 'selected' : '' ?>>Đã xác thực</option>
+                    <option value="unverified" <?= (($_GET['status'] ?? '') == 'unverified') ? 'selected' : '' ?>>Chưa xác thực</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="sort" name="sort" class="form-select">
+                    <option value="">Sắp xếp theo</option>
+                    <option value="name_asc" <?= (($_GET['sort'] ?? '') == 'name_asc') ? 'selected' : '' ?>>Tên (A-Z)</option>
+                    <option value="name_desc" <?= (($_GET['sort'] ?? '') == 'name_desc') ? 'selected' : '' ?>>Tên (Z-A)</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-outline-primary w-100">Lọc</button>
+            </div>
+        </form>
     </div>
+</div>
 
+<!-- Bảng hiển thị danh sách thành viên -->
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">Thành viên</th>
+                    <th scope="col">Vai trò</th>
+                    <th scope="col" class="text-center">Trạng thái</th>
+                    <th scope="col">Ngày tham gia</th>
+                    <th scope="col" class="text-center">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (!empty($accounts)): ?>
+                    <?php foreach ($accounts as $account): ?>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar me-3">
+                                        <?= strtoupper(substr(htmlspecialchars($account->fullname), 0, 1)) ?>
+                                    </div>
+                                    <div>
+                                        <a href="/account/view/<?= $account->id ?>" class="fw-bold text-dark text-decoration-none">
+                                            <?= htmlspecialchars($account->fullname) ?>
+                                        </a>
+                                        <small class="d-block text-muted"><?= htmlspecialchars($account->email ?? $account->username) ?></small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <?php if ($account->role === 'admin'): ?>
+                                    <span class="badge bg-danger">Quản trị viên</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">Thành viên</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-center">
+                                <?php if ($account->is_verified): ?>
+                                    <span class="badge bg-success">Đã xác thực</span>
+                                <?php else: ?>
+                                    <span class="badge bg-warning text-dark">Chưa xác thực</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php 
+                                    // Kiểm tra xem cột created_at có tồn tại không
+                                    if (isset($account->created_at)) {
+                                        echo date('d/m/Y', strtotime($account->created_at));
+                                    } else {
+                                        echo 'N/A';
+                                    }
+                                ?>
+                            </td>
+                            <td class="text-center">
+                                <a href="/account/view/<?= $account->id; ?>" class="btn btn-sm btn-outline-info" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
+                                <a href="/account/edit/<?= $account->id; ?>" class="btn btn-sm btn-outline-warning" title="Sửa vai trò"><i class="fas fa-user-shield"></i></a>
+                                <a href="/account/delete/<?= $account->id; ?>" class="btn btn-sm btn-outline-danger" title="Xóa thành viên" onclick="return confirm('Bạn có chắc chắn muốn xóa thành viên này?');">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="5" class="text-center text-muted p-5">
+                            Không tìm thấy thành viên nào.
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- CSS cho avatar -->
+<style>
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #0d6efd;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+</style>

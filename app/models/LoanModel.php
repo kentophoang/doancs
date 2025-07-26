@@ -32,8 +32,17 @@ class LoanModel {
         return $stmt->execute();
     }
 
+    /**
+     * Lấy một giao dịch mượn sách cụ thể bằng ID.
+     * SỬA LỖI: Bổ sung b.author và b.image vào câu lệnh SELECT.
+     */
     public function getLoanById($loan_id) {
-        $query = "SELECT l.*, b.name as book_name, a.fullname as borrower_fullname 
+        $query = "SELECT 
+                    l.*, 
+                    b.name as book_name, 
+                    b.author, 
+                    b.image, 
+                    a.fullname as borrower_fullname 
                   FROM " . $this->table_name . " l
                   JOIN books b ON l.book_id = b.id
                   JOIN accounts a ON l.user_id = a.id
@@ -44,8 +53,19 @@ class LoanModel {
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
     
+    /**
+     * Lấy tất cả các giao dịch mượn sách với bộ lọc.
+     * SỬA LỖI: Bổ sung b.author và b.image vào câu lệnh SELECT.
+     */
     public function getAllLoans($searchTerm = null, $status = null, $userId = null) {
-        $query = "SELECT l.*, b.name as book_name, b.ISBN, a.username as borrower_username, a.fullname as borrower_fullname
+        $query = "SELECT 
+                    l.*, 
+                    b.name as book_name, 
+                    b.author, 
+                    b.image, 
+                    b.ISBN, 
+                    a.username as borrower_username, 
+                    a.fullname as borrower_fullname
                   FROM " . $this->table_name . " l
                   JOIN books b ON l.book_id = b.id
                   JOIN accounts a ON l.user_id = a.id
@@ -169,11 +189,7 @@ class LoanModel {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
-
-    /**
-     * SỬA LỖI: Thêm lại phương thức bị thiếu.
-     * Cập nhật trạng thái của tất cả sách đang mượn đã quá hạn thành 'overdue'.
-     */
+    
     public function updateOverdueStatusAll()
     {
         $query = "UPDATE " . $this->table_name . " SET status = 'overdue' WHERE due_date < CURDATE() AND status = 'borrowed'";

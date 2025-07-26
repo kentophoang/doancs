@@ -1,95 +1,70 @@
-<section class="vh-100 d-flex align-items-center justify-content-center bg-primary-light">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8">
-                <div class="card shadow-lg border-0 rounded-4">
-                    <div class="card-body p-5">
-                        <h2 class="text-center text-primary fw-bold mb-4">Đăng ký tài khoản Thư viện</h2>
-                        <p class="text-center text-muted">Tạo tài khoản mới ngay để bắt đầu mượn sách!</p>
+<?php
+// Lấy lại dữ liệu đã nhập và lỗi từ session (nếu có)
+$errors = $_SESSION['registration_errors'] ?? [];
+$old_data = $_SESSION['POST_data'] ?? [];
 
-                        <?php if (isset($errors)): ?>
-                            <div class="alert alert-danger text-center">
-                                <ul class="mb-0">
-                                    <?php foreach ($errors as $err): ?>
-                                        <li><?= htmlspecialchars($err) ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
+// Xóa session sau khi đã lấy dữ liệu để tránh hiển thị lại ở lần sau
+unset($_SESSION['registration_errors']);
+unset($_SESSION['POST_data']);
+?>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="card-title text-center fw-bold mb-3">Tạo tài khoản mới</h2>
+                    <p class="text-center text-muted mb-4">Tham gia cộng đồng LIBSMART ngay hôm nay!</p>
+
+                    <!-- Hiển thị khối thông báo lỗi (nếu có) -->
+                    <?php if (!empty($errors)): ?>
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                <?php foreach ($errors as $error): ?>
+                                    <li><?= htmlspecialchars($error) ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Form đăng ký trỏ đến action /account/register -->
+                    <form action="/account/register" method="POST">
+                        <div class="mb-3">
+                            <label for="fullname" class="form-label">Họ và tên</label>
+                            <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Nhập họ và tên của bạn" value="<?= htmlspecialchars($old_data['fullname'] ?? '') ?>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Tên đăng nhập</label>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Chọn một tên đăng nhập" value="<?= htmlspecialchars($old_data['username'] ?? '') ?>" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Địa chỉ Email</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Nhập email để xác thực tài khoản" value="<?= htmlspecialchars($old_data['email'] ?? '') ?>" required>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label for="password" class="form-label">Mật khẩu</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
                             </div>
-                        <?php endif; ?>
-
-                        <form action="/account/save" method="post">
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Tên đăng nhập</label>
-                                    <input type="text" class="form-control rounded-3 shadow-sm" name="username" placeholder="Nhập tên đăng nhập" required value="<?= htmlspecialchars($_POST['username'] ?? '') ?>">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Họ và tên</label>
-                                    <input type="text" class="form-control rounded-3 shadow-sm" name="fullname" placeholder="Nhập họ và tên" required value="<?= htmlspecialchars($_POST['fullname'] ?? '') ?>">
-                                </div>
+                            <div class="col-md-6">
+                                <label for="confirmpassword" class="form-label">Xác nhận mật khẩu</label>
+                                <input type="password" class="form-control" id="confirmpassword" name="confirmpassword" required>
                             </div>
+                        </div>
 
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Mật khẩu</label>
-                                    <input type="password" class="form-control rounded-3 shadow-sm" name="password" placeholder="Nhập mật khẩu" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Xác nhận mật khẩu</label>
-                                    <input type="password" class="form-control rounded-3 shadow-sm" name="confirmpassword" placeholder="Nhập lại mật khẩu" required>
-                                </div>
-                            </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Đăng ký</button>
+                        </div>
 
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Nghề nghiệp/Vị trí</label>
-                                    <input type="text" class="form-control rounded-3 shadow-sm" name="profession" placeholder="VD: Lập trình viên, Kế toán..." value="<?= htmlspecialchars($_POST['profession'] ?? '') ?>">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Ngành nghề/Lĩnh vực</label>
-                                    <input type="text" class="form-control rounded-3 shadow-sm" name="industry" placeholder="VD: CNTT, Tài chính, Y tế..." value="<?= htmlspecialchars($_POST['industry'] ?? '') ?>">
-                                </div>
-                            </div>
-
-                            <div class="d-grid">
-                                <button class="btn btn-primary rounded-3 btn-lg shadow-sm" type="submit">Đăng ký tài khoản</button>
-                            </div>
-                        </form>
-
-                        <p class="text-center mt-3">Đã có tài khoản?
-                            <a href="/account/login" class="text-primary fw-bold">Đăng nhập ngay</a>
-                        </p>
-                    </div>
+                        <div class="text-center mt-3">
+                            <p class="mb-0">Đã có tài khoản? <a href="/account/login">Đăng nhập ngay</a></p>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-</section>
-
-<style>
-    .bg-primary-light {
-        background: linear-gradient(135deg, #a2d2ff, #62b6cb);
-        height: 100vh;
-    }
-    .text-primary {
-        color: #0077b6 !important;
-    }
-    .btn-primary {
-        background: #0077b6;
-        border: none;
-        font-weight: bold;
-        transition: all 0.3s ease-in-out;
-    }
-    .btn-primary:hover {
-        background: #005f8e;
-        transform: scale(1.05);
-    }
-    .form-control {
-        border: 2px solid #0077b6;
-        transition: all 0.3s ease-in-out;
-    }
-    .form-control:focus {
-        border-color: #005f8e;
-        box-shadow: 0 0 10px rgba(0, 119, 182, 0.3);
-    }
-</style>
+</div>

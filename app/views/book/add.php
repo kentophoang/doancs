@@ -84,6 +84,10 @@
                 <button type="submit" class="btn btn-primary w-50">➕ Thêm sách</button>
                 <a href="/Book/list" class="btn btn-secondary w-50 ms-2">⬅️ Quay lại</a>
             </div>
+            <div class="mb-3">
+                <label for="location" class="form-label">Vị trí trong thư viện</label>
+                <input type="text" class="form-control" id="location" name="location" placeholder="Ví dụ: Kệ A3, Tầng 2" value="<?= htmlspecialchars($book->location ?? '') ?>">
+            </div>
         </form>
     </div>
 </div>

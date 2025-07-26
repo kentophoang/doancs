@@ -61,13 +61,8 @@ if (strpos($request_uri, '/Subject/publicList') !== false) {
             box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
             border: none;
         }
-        /* CSS cho nút bấm sidebar */
-        #sidebarToggle {
-            border: none;
-        }
-        #sidebarToggle:hover {
-            background-color: #e9ecef;
-        }
+        #sidebarToggle { border: none; }
+        #sidebarToggle:hover { background-color: #e9ecef; }
     </style>
 </head>
 <body>
@@ -75,11 +70,7 @@ if (strpos($request_uri, '/Subject/publicList') !== false) {
 <nav class="navbar navbar-expand-lg navbar-light main-navbar">
     <div class="container-fluid">
         <div class="d-flex align-items-center">
-            <?php
-            // THÊM MỚI: Nút bấm này chỉ hiển thị khi admin đăng nhập
-            // và nó sẽ điều khiển thanh bên trong admin_layout.php
-            if (SessionHelper::isLoggedIn() && SessionHelper::isAdmin()) :
-            ?>
+            <?php if (SessionHelper::isLoggedIn() && SessionHelper::isAdmin()) : ?>
                 <button class="btn btn-link text-secondary me-2 p-2" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
                     <i class="fas fa-bars fs-5"></i>
                 </button>
@@ -113,6 +104,20 @@ if (strpos($request_uri, '/Subject/publicList') !== false) {
 
             <div class="d-flex align-items-center">
                 <?php if (SessionHelper::isLoggedIn()): ?>
+                    
+                    <!-- THÊM MỚI: Biểu tượng giỏ hàng chỉ hiển thị cho thành viên -->
+                    <?php if (!SessionHelper::isAdmin()): ?>
+                        <a href="/book/cart" class="nav-link position-relative me-3" title="Giỏ mượn sách">
+                            <i class="fas fa-shopping-cart fs-5"></i>
+                            <?php $cart_count = count($_SESSION['borrow_cart'] ?? []); ?>
+                            <?php if ($cart_count > 0): ?>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    <?= $cart_count ?>
+                                </span>
+                            <?php endif; ?>
+                        </a>
+                    <?php endif; ?>
+
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-user-circle me-1"></i>

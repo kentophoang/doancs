@@ -1,5 +1,4 @@
 <?php
-
 class SubjectModel
 {
     private $conn;
@@ -10,88 +9,94 @@ class SubjectModel
         $this->conn = $db;
     }
 
-    // Lấy danh sách tất cả chủ đề/ngành nghề, bao gồm parent_id
+    /**
+     * Lấy tất cả các chủ đề/môn học.
+     */
     public function getSubjects()
     {
-        try {
-            $query = "SELECT id, name, description, parent_id FROM " . $this->table_name . " ORDER BY name ASC";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_OBJ);
-        } catch (Exception $e) {
-            die("Lỗi khi lấy chủ đề/ngành nghề: " . $e->getMessage());
-        }
+        $sql = "SELECT s.*, f.name as faculty_name 
+                FROM " . $this->table_name . " s
+                LEFT JOIN faculties f ON s.faculty_id = f.id
+                ORDER BY s.name ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
-    // Lấy một chủ đề/ngành nghề theo ID
+    /**
+     * Lấy một chủ đề cụ thể bằng ID.
+     */
     public function getSubjectById($id)
     {
-        try {
-            $query = "SELECT id, name, description, parent_id FROM " . $this->table_name . " WHERE id = :id";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_OBJ);
-        } catch (Exception $e) {
-            die("Lỗi khi lấy thông tin chủ đề/ngành nghề: " . $e->getMessage());
-        }
+        $sql = "SELECT * FROM subjects WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    // Lấy danh sách chủ đề/ngành nghề cấp cao nhất (parent_id IS NULL)
-    public function getParentSubjects() {
-        try {
-            $query = "SELECT id, name FROM " . $this->table_name . " WHERE parent_id IS NULL ORDER BY name ASC";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_OBJ);
-        } catch (Exception $e) {
-            die("Lỗi khi lấy chủ đề/ngành nghề cha: " . $e->getMessage());
-        }
-    }
-
-    // Thêm chủ đề/ngành nghề mới
-    public function addSubject($name, $description, $parentId = null)
+    /**
+     * Thêm một chủ đề mới.
+     * Cần được cập nhật để lưu cả faculty_id.
+     */
+    public function addSubject($name, $description, $parent_id, $faculty_id)
     {
-        try {
-            $query = "INSERT INTO " . $this->table_name . " (name, description, parent_id) VALUES (:name, :description, :parentId)";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':name', $name, PDO::PARAM_STR);
-            $stmt->bindParam(':description', $description, PDO::PARAM_STR);
-            $stmt->bindParam(':parentId', $parentId, PDO::PARAM_INT);
-            return $stmt->execute();
-        } catch (Exception $e) {
-            die("Lỗi khi thêm chủ đề/ngành nghề: " . $e->getMessage());
-        }
+        $sql = "INSERT INTO subjects (name, description, parent_id, faculty_id) VALUES (:name, :description, :parent_id, :faculty_id)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':description', $description);
+        $stmt->bindParam(':parent_id', $parent_id);
+        $stmt->bindParam(':faculty_id', $faculty_id);
+        return $stmt->execute();
     }
 
-    // Cập nhật chủ đề/ngành nghề
-    public function updateSubject($id, $name, $description, $parentId = null)
+    /**
+     * Cập nhật một chủ đề.
+     * Cần được cập nhật để lưu cả faculty_id.
+     */
+    public function updateSubject($id, $name, $description, $parent_id, $faculty_id)
     {
-        try {
-            $query = "UPDATE " . $this->table_name . " SET name = :name, description = :description, parent_id = :parentId WHERE id = :id";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-            $stmt->bindParam(':name', $name, PDO::PARAM_STR);
-            $stmt->bindParam(':description', $description, PDO::PARAM_STR);
-            $stmt->bindParam(':parentId', $parentId, PDO::PARAM_INT);
-            return $stmt->execute();
-        } catch (Exception $e) {
-            die("Lỗi khi cập nhật chủ đề/ngành nghề: " . $e->getMessage());
-        }
+        $sql = "UPDATE subjects SET name = :name, description = :description, parent_id = :parent_id, faculty_id = :faculty_id WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':description', $description);
+        $stmt->bindParam(':parent_id', $parent_id);
+        $stmt->bindParam(':faculty_id', $faculty_id);
+        return $stmt->execute();
     }
 
-    // Xóa chủ đề/ngành nghề
+    /**
+     * Xóa một chủ đề.
+     */
     public function deleteSubject($id)
     {
-        try {
-            // When deleting a subject, its child subjects will have their parent_id set to NULL (due to ON DELETE SET NULL)
-            $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-            return $stmt->execute();
-        } catch (Exception $e) {
-            die("Lỗi khi xóa chủ đề/ngành nghề: " . $e->getMessage());
-        }
+        $sql = "DELETE FROM subjects WHERE id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
+
+    /**
+     * Lấy danh sách tất cả các Danh mục chính.
+     */
+    public function getMainCategories()
+    {
+        $query = "SELECT * FROM main_categories ORDER BY name ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    /**
+     * Lấy danh sách tất cả các Khoa.
+     * Hàm này chỉ được định nghĩa MỘT LẦN.
+     */
+    public function getFaculties()
+    {
+        $query = "SELECT * FROM faculties ORDER BY name ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 }
-?>

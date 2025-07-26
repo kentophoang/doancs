@@ -1,84 +1,75 @@
-<?php include 'app/views/shares/header.php'; ?>
-<div class="container mt-4">
-    <div class="card shadow-lg">
-        <div class="card-header bg-primary text-white text-center">
-            <h2 class="mb-0">Chi tiết sách</h2>
-        </div>
-        <div class="card-body">
-            <?php if ($book): // Changed $product to $book ?>
-                <div class="row">
-                    <div class="col-md-6">
-                        <?php if ($book->image): // Changed $product to $book ?>
-                            <img src="/<?php echo htmlspecialchars($book->image, ENT_QUOTES, 'UTF-8'); ?>"
-                                class="img-fluid rounded"
-                                alt="<?php echo htmlspecialchars($book->name, ENT_QUOTES, 'UTF-8'); ?>">
-                        <?php else: ?>
-                            <img src="/images/no-image.png"
-                                class="img-fluid rounded"
-                                alt="Không có ảnh">
-                        <?php endif; ?>
+<?php
+// File này được gọi từ BookController, biến $book đã có sẵn.
+?>
+
+<div class="container my-5">
+    <?php if ($book): ?>
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-4 p-md-5">
+                <div class="row g-5">
+                    <!-- Cột ảnh bìa sách -->
+                    <div class="col-lg-4 text-center">
+                        <img src="/<?= htmlspecialchars($book->image ?? 'uploads/default-book.jpg') ?>" 
+                             class="img-fluid rounded shadow" 
+                             alt="<?= htmlspecialchars($book->name) ?>"
+                             style="max-height: 450px; object-fit: cover;">
                     </div>
-                    <div class="col-md-6">
-                        <h3 class="card-title text-dark font-weight-bold">
-                            <?php echo htmlspecialchars($book->name, ENT_QUOTES, 'UTF-8'); ?>
-                        </h3>
-                        <p class="card-text">
-                            <?php echo nl2br(htmlspecialchars($book->description, ENT_QUOTES, 'UTF-8')); ?>
-                        </p>
-                        <p><strong>Tác giả:</strong> <?php echo htmlspecialchars($book->author, ENT_QUOTES, 'UTF-8'); ?></p>
-                        <p><strong>Nhà xuất bản:</strong> <?php echo htmlspecialchars($book->publisher, ENT_QUOTES, 'UTF-8'); ?></p>
-                        <p><strong>Năm xuất bản:</strong> <?php echo htmlspecialchars($book->publication_year, ENT_QUOTES, 'UTF-8'); ?></p>
-                        <p><strong>ISBN:</strong> <?php echo htmlspecialchars($book->ISBN, ENT_QUOTES, 'UTF-8'); ?></p>
-                        <p><strong>Chủ đề:</strong>
-                            <span class="badge bg-info text-white">
-                                <?php echo !empty($book->subject_name) ?
-                                    htmlspecialchars($book->subject_name, ENT_QUOTES, 'UTF-8') : 'Chưa có chủ đề'; ?>
-                            </span>
-                        </p>
-                        <p><strong>Tổng số bản sao:</strong> <?php echo htmlspecialchars($book->number_of_copies, ENT_QUOTES, 'UTF-8'); ?></p>
-                        <p><strong>Số bản có sẵn:</strong> <?php echo htmlspecialchars($book->available_copies, ENT_QUOTES, 'UTF-8'); ?></p>
 
-                        <div class="mt-4">
-                            <?php if (isset($_SESSION['username'])): ?>
-                                <?php if ($book->available_copies > 0): ?>
-                                    <a href="/Book/borrow/<?php echo $book->id; ?>" class="btn btn-success px-4">
-                                        Mượn sách
-                                    </a>
-                                <?php else: ?>
-                                    <button class="btn btn-secondary px-4" disabled>Hết sách</button>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                <p class="text-danger font-weight-bold">Bạn cần <a href="/account/login/">đăng nhập</a> để mượn sách.</p>
-                            <?php endif; ?>
+                    <!-- Cột thông tin chi tiết -->
+                    <div class="col-lg-8 d-flex flex-column">
+                        <h1 class="display-6 fw-bold mb-2"><?= htmlspecialchars($book->name) ?></h1>
+                        <p class="h5 text-muted mb-4">bởi <?= htmlspecialchars($book->author) ?></p>
 
-                            <a href="/Book/index" class="btn btn-secondary px-4 ml-2">Quay lại danh sách</a>
+                        <div class="mb-4">
+                            <span class="badge bg-secondary me-2"><?= htmlspecialchars($book->subject_name ?? 'Chưa phân loại') ?></span>
+                            <span class="badge bg-info text-dark">Năm XB: <?= htmlspecialchars($book->publication_year) ?></span>
                         </div>
 
+                        <p class="lead"><?= htmlspecialchars($book->description) ?></p>
+
+                        <hr class="my-4">
+
+                        <!-- Bảng thông tin bổ sung -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <p><strong>Nhà xuất bản:</strong> <?= htmlspecialchars($book->publisher ?? 'N/A') ?></p>
+                                <p><strong>Mã ISBN:</strong> <?= htmlspecialchars($book->ISBN ?? 'N/A') ?></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Vị trí:</strong> <span class="fw-bold text-primary"><?= htmlspecialchars($book->location ?? 'Chưa cập nhật') ?></span></p>
+                                <p><strong>Tình trạng:</strong> 
+                                    <?php if ($book->available_copies > 0): ?>
+                                        <span class="fw-bold text-success">Còn sách (<?= $book->available_copies ?> quyển)</span>
+                                    <?php else: ?>
+                                        <span class="fw-bold text-danger">Đã hết sách</span>
+                                    <?php endif; ?>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Khu vực hành động (Mượn sách) -->
+                        <div class="mt-auto">
+                            <?php if (SessionHelper::isLoggedIn()): ?>
+                                <?php if ($book->available_copies > 0): ?>
+                                    <a href="/book/addToCart/<?= $book->id ?>" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-plus-circle me-2"></i> Thêm vào Phiếu mượn
+                                    </a>
+                                <?php else: ?>
+                                    <button class="btn btn-secondary btn-lg w-100" disabled>Đã hết sách</button>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                <div class="alert alert-warning text-center">
+                                    Vui lòng <a href="/account/login">đăng nhập</a> để mượn sách.
+                                </div>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
-            <?php else: ?>
-                <div class="alert alert-danger text-center">
-                    <h4>Không tìm thấy sách!</h4>
-                </div>
-            <?php endif; ?>
+            </div>
         </div>
-    </div>
+    <?php else: ?>
+        <div class="alert alert-danger text-center">
+            <h4>Không tìm thấy thông tin sách!</h4>
+        </div>
+    <?php endif; ?>
 </div>
-<?php include 'app/views/shares/footer.php'; ?>
-<style>
-    .card-header {
-        background-color: #007bff; /* Primary color */
-        color: white;
-    }
-    .badge-info {
-        background-color: #17a2b8 !important; /* Bootstrap info color */
-    }
-    .btn-success {
-        background-color: #28a745; /* Bootstrap success color */
-        border-color: #28a745;
-    }
-    .btn-secondary {
-        background-color: #6c757d; /* Bootstrap secondary color */
-        border-color: #6c757d;
-    }
-</style>

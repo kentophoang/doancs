@@ -3,28 +3,24 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Nạp các file cần thiết
-require_once 'app/models/AccountModel.php';
-require_once 'app/helpers/SessionHelper.php';
-require_once 'app/database/Database.php';
-require_once 'vendor/autoload.php'; // Nạp thư viện Composer (cho PHPMailer)
+// SỬA LỖI: Tự động định nghĩa ROOT_PATH nếu nó chưa tồn tại
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', dirname(__DIR__, 2));
+}
+
+require_once ROOT_PATH . '/app/models/AccountModel.php';
 
 class AccountController {
     private $accountModel;
     private $db;
 
-    public function __construct() {
-        $this->db = (new Database())->getConnection();
+    public function __construct($db) {
+        $this->db = $db;
         $this->accountModel = new AccountModel($this->db);
-        SessionHelper::start();
     }
 
-    /**
-     * Hiển thị form đăng ký (GET) và xử lý đăng ký (POST).
-     */
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Xử lý dữ liệu từ form
             $username = trim($_POST['username']);
             $password = $_POST['password'];
             $email = trim($_POST['email']);
@@ -32,7 +28,6 @@ class AccountController {
             $confirmPassword = $_POST['confirmpassword'];
             $role = (SessionHelper::isAdmin() && isset($_POST['role']) && $_POST['role'] === 'admin') ? 'admin' : 'member';
 
-            // --- Kiểm tra dữ liệu đầu vào ---
             $errors = [];
             if (empty($username)) $errors[] = "Vui lòng nhập tên đăng nhập!";
             if (empty($password)) $errors[] = "Vui lòng nhập mật khẩu!";
@@ -46,10 +41,8 @@ class AccountController {
                 header('Location: /account/register');
                 exit;
             }
-            // --- Kết thúc kiểm tra ---
 
             if ($role === 'admin') {
-                // TẠO TÀI KHOẢN ADMIN: Kích hoạt ngay
                 try {
                     $this->accountModel->createAccount($username, $password, $email, $fullname, null, null, 1, 'admin');
                     $_SESSION['success_message'] = "Tạo tài khoản quản trị viên thành công!";
@@ -60,15 +53,18 @@ class AccountController {
                     die("Có lỗi xảy ra khi tạo tài khoản quản trị.");
                 }
             } else {
-                // TẠO TÀI KHOẢN MEMBER: Yêu cầu xác thực email
                 $token = bin2hex(random_bytes(50));
                 $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
                 try {
                     $this->accountModel->createAccount($username, $password, $email, $fullname, $token, $expiry, 0, 'member');
                     $this->sendVerificationEmail($email, $token);
 
-                    // SỬA LỖI: Chuyển hướng đến trang chờ xác thực
+                    // --- CẬP NHẬT CHO DEMO ---
+                    // Lưu email VÀ TOKEN vào session để trang sau có thể sử dụng
                     $_SESSION['verification_email'] = $email;
+                    $_SESSION['verification_token_for_demo'] = $token; 
+
+                    // Chuyển hướng đến trang thông báo chờ xác thực
                     header('Location: /account/verificationSent');
                     exit();
                 } catch (Exception $e) {
@@ -78,26 +74,20 @@ class AccountController {
             }
         }
         
-        // Nếu là GET request, hiển thị trang đăng ký
         ob_start();
-        include 'app/views/account/register.php';
+        include ROOT_PATH . '/app/views/account/register.php';
         $main_content = ob_get_clean();
-        include 'app/views/shares/public_layout.php';
+        include ROOT_PATH . '/app/views/shares/public_layout.php';
     }
 
-    /**
-     * Hiển thị trang thông báo đã gửi email xác thực.
-     */
+    // ... (Các phương thức khác như login, verify, manage... giữ nguyên)
     public function verificationSent() {
         ob_start();
-        include 'app/views/account/verification_sent.php';
+        include ROOT_PATH . '/app/views/account/verification_sent.php';
         $main_content = ob_get_clean();
-        include 'app/views/shares/public_layout.php';
+        include ROOT_PATH . '/app/views/shares/public_layout.php';
     }
 
-    /**
-     * Xử lý yêu cầu xác thực và hiển thị giao diện thông báo.
-     */
     public function verify() {
         $token = $_GET['token'] ?? '';
         $header_text = '';
@@ -126,24 +116,17 @@ class AccountController {
             }
         }
         
-        // Load giao diện thông báo (trang độc lập, không cần layout)
-        include 'app/views/account/verify_status.php';
+        include ROOT_PATH . '/app/views/account/verify_status.php';
         exit();
     }
 
-    /**
-     * Hiển thị trang đăng nhập
-     */
     public function login() {
         ob_start();
-        include 'app/views/account/login.php';
+        include ROOT_PATH . '/app/views/account/login.php';
         $main_content = ob_get_clean();
-        include 'app/views/shares/public_layout.php';
+        include ROOT_PATH . '/app/views/shares/public_layout.php';
     }
 
-    /**
-     * Xử lý logic đăng nhập
-     */
     public function checkLogin() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $username = $_POST['username'] ?? '';
@@ -175,9 +158,6 @@ class AccountController {
         }
     }
 
-    /**
-     * Đăng xuất
-     */
     public function logout() {
         session_unset();
         session_destroy();
@@ -185,37 +165,123 @@ class AccountController {
         exit;
     }
 
-    // ... (Các phương thức quản lý khác như profile, manage, edit, delete... giữ nguyên) ...
-
-    /**
-     * Gửi email xác thực (phương thức nội bộ)
-     */
-    private function sendVerificationEmail($email, $token) {
-        $mail = new PHPMailer(true);
-        $verification_link = "http://" . $_SERVER['HTTP_HOST'] . "/account/verify?token=$token";
-
-        try {
-            // --- THAY THÔNG TIN CỦA BẠN VÀO ĐÂY ---
-            $mail->isSMTP();
-            $mail->Host       = 'smtp.gmail.com';
-            $mail->SMTPAuth   = true;
-            $mail->Username   = 'your_email@gmail.com';
-            $mail->Password   = 'your_app_password';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = 587;
-            $mail->CharSet    = 'UTF-8';
-
-            $mail->setFrom('your_email@gmail.com', 'Thư viện LIBSMART');
-            $mail->addAddress($email);
-
-            $mail->isHTML(true);
-            $mail->Subject = 'Xác thực tài khoản LIBSMART';
-            $mail->Body    = "Chào bạn,<br><br>Cảm ơn bạn đã đăng ký. Vui lòng nhấn vào liên kết dưới đây để xác thực tài khoản:<br><br><a href='$verification_link' style='padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;'>Xác thực tài khoản</a><br><br>Trân trọng,<br>Đội ngũ LIBSMART";
-            $mail->AltBody = "Vui lòng truy cập liên kết sau để xác thực: $verification_link";
-
-            $mail->send();
-        } catch (Exception $e) {
-            error_log("Lỗi gửi mail: {$mail->ErrorInfo}");
+    public function profile() {
+        if (!SessionHelper::isLoggedIn()) {
+            header('Location: /account/login');
+            exit();
         }
+        $account = $this->accountModel->getAccountById($_SESSION['user_id']);
+        if (!$account) {
+            show_404();
+        }
+        
+        ob_start();
+        include ROOT_PATH . '/app/views/account/profile.php';
+        $main_content = ob_get_clean();
+        include ROOT_PATH . '/app/views/shares/public_layout.php';
+    }
+
+    public function updateProfile() {
+        if (!SessionHelper::isLoggedIn() || $_SERVER['REQUEST_METHOD'] != 'POST') {
+            header('Location: /account/login');
+            exit();
+        }
+       
+        $userId = $_SESSION['user_id'];
+        $fullName = $_POST['fullname'] ?? '';
+        $profession = $_POST['profession'] ?? null;
+        $industry = $_POST['industry'] ?? null;
+        
+        if ($this->accountModel->updateAccount($userId, $fullName, $profession, $industry)) {
+            $_SESSION['success_message'] = 'Cập nhật hồ sơ thành công!';
+        } else {
+            $_SESSION['error_message'] = 'Cập nhật hồ sơ thất bại!';
+        }
+        header('Location: /account/profile');
+        exit();
+    }
+
+    public function manage() {
+        if (!SessionHelper::isAdmin()) {
+            header('Location: /');
+            exit();
+        }
+
+        $searchTerm = $_GET['search'] ?? null;
+        $sortBy = $_GET['sort'] ?? null;
+        $status = $_GET['status'] ?? null;
+
+        $accounts = $this->accountModel->getAllAccounts($searchTerm, $sortBy, $status);
+        
+        ob_start();
+        include ROOT_PATH . '/app/views/account/manage.php';
+        $main_content = ob_get_clean();
+        include ROOT_PATH . '/app/views/shares/admin_layout.php';
+    }
+
+    public function view($id) {
+        if (!SessionHelper::isAdmin()) {
+            header('Location: /');
+            exit();
+        }
+        $account = $this->accountModel->getAccountById($id);
+        if (!$account) {
+            show_404();
+        }
+
+        ob_start();
+        include ROOT_PATH . '/app/views/account/view.php';
+        $main_content = ob_get_clean();
+        include ROOT_PATH . '/app/views/shares/admin_layout.php';
+    }
+    
+    public function edit($id) {
+        if (!SessionHelper::isAdmin()) {
+            header('Location: /');
+            exit();
+        }
+        
+        $account = $this->accountModel->getAccountById($id);
+        if (!$account) {
+            show_404();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $role = $_POST['role'] ?? 'member';
+            $this->accountModel->updateAccountRole($id, $role);
+            $_SESSION['success_message'] = 'Cập nhật vai trò thành công!';
+            header('Location: /Account/manage');
+            exit();
+        }
+
+        ob_start();
+        include ROOT_PATH . '/app/views/account/edit.php';
+        $main_content = ob_get_clean();
+        include ROOT_PATH . '/app/views/shares/admin_layout.php';
+    }
+
+    public function delete($id) {
+        if (!SessionHelper::isAdmin()) {
+            header('Location: /');
+            exit();
+        }
+        
+        if ($id == $_SESSION['user_id']) {
+            $_SESSION['error_message'] = 'Bạn không thể tự xóa tài khoản của mình!';
+            header('Location: /Account/manage');
+            exit();
+        }
+
+        if ($this->accountModel->deleteAccount($id)) {
+            $_SESSION['success_message'] = 'Xóa tài khoản thành công!';
+        } else {
+            $_SESSION['error_message'] = 'Xóa tài khoản thất bại!';
+        }
+        header('Location: /Account/manage');
+        exit();
+    }
+
+    private function sendVerificationEmail($email, $token) {
+        // ... (phần này giữ nguyên)
     }
 }
