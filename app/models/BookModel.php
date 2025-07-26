@@ -70,6 +70,28 @@ class BookModel
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
+    /**
+     * SỬA LỖI: Thêm phương thức bị thiếu.
+     * Lấy thông tin của nhiều sách dựa trên một mảng các ID.
+     * @param array $ids Mảng chứa các ID của sách.
+     * @return array Mảng các đối tượng sách.
+     */
+    public function getBooksByIds(array $ids)
+    {
+        if (empty($ids)) {
+            return [];
+        }
+        // Tạo chuỗi placeholder (?, ?, ?) cho câu lệnh IN
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        
+        $query = "SELECT * FROM " . $this->table_name . " WHERE id IN (" . $placeholders . ")";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($ids);
+        
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
     // Thêm sách mới
     public function addBook($name, $description, $author, $publisher, $publication_year, $ISBN, $subject_id, $image, $number_of_copies, $location)
     {
@@ -149,10 +171,6 @@ class BookModel
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
     
-    /**
-     * SỬA LỖI: Thêm phương thức bị thiếu.
-     * Lấy số lượng sách theo từng chủ đề cho biểu đồ tròn.
-     */
     public function getBookCountBySubject()
     {
         $query = "SELECT s.name as subject_name, COUNT(b.id) as book_count
